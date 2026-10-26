@@ -1,0 +1,36 @@
+{
+  "name": "build-smart-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build Smart — Construction | Interior | Digital Solutions. Premium marketing website with lead capture.",
+  "scripts": {
+    "predev": "node scripts/optimize-photos.mjs",
+    "dev": "next dev",
+    "prebuild": "node scripts/optimize-photos.mjs",
+    "build": "next build",
+    "start": "next start",
+    "photos": "node scripts/optimize-photos.mjs",
+    "typecheck": "tsc --noEmit",
+    "leads": "node scripts/export-leads.mjs"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "dependencies": {
+    "@fontsource-variable/cormorant": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "lucide-react": "^1.61.0",
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5"
+  }
+}
