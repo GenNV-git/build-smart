@@ -108,7 +108,7 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
         className={`consult-dialog overflow-y-auto outline-none overscroll-contain border border-white/70 bg-ivory p-0 text-ink shadow-[0_40px_90px_-30px_rgb(0_0_0/0.6)] ${
           auto
             ? // centred card on every screen size
-              "m-auto max-h-[calc(100dvh-2rem)] w-[min(54rem,calc(100vw-2rem))] max-w-none rounded-[1.5rem]"
+              "m-auto max-h-[calc(100dvh-2rem)] w-[min(66rem,calc(100vw-2rem))] max-w-none rounded-[1.5rem]"
             : // bottom sheet on phones, centred card from tablet up
               "mx-0 mb-0 mt-auto max-h-[92dvh] w-full max-w-none rounded-t-[1.6rem] sm:m-auto sm:max-h-[calc(100dvh-1.5rem)] sm:w-[min(40rem,calc(100vw-1.5rem))] sm:rounded-[1.6rem]"
         }`}
@@ -123,7 +123,7 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
           type="button"
           onClick={close}
           className={`absolute right-3 top-3 z-10 grid size-11 place-items-center rounded-full transition ${
-            auto ? "bg-espresso/55 text-cream backdrop-blur hover:bg-espresso/75 md:bg-transparent md:text-chocolate/70 md:backdrop-blur-none md:hover:bg-chocolate/5" : "text-chocolate/70 hover:bg-chocolate/5 hover:text-espresso"
+            auto ? "bg-espresso/55 text-cream backdrop-blur hover:bg-espresso/75 lg:bg-transparent lg:text-chocolate/70 lg:backdrop-blur-none lg:hover:bg-chocolate/5" : "text-chocolate/70 hover:bg-chocolate/5 hover:text-espresso"
           }`}
           aria-label="Close"
         >
@@ -134,20 +134,20 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
         </span>
 
         {auto ? (
-          <div className="grid md:grid-cols-[0.9fr_1.1fr]">
+          <div className="grid lg:grid-cols-[0.72fr_1.28fr]">
             {/* Photo panel — slim strip on phones, full column on larger screens */}
-            <div className="relative h-36 overflow-hidden bg-espresso min-[400px]:h-44 md:h-auto md:min-h-[32rem] [@media(max-height:680px)_and_(max-width:767px)]:hidden">
-              <Image src={images.quotePopup.src} alt="" fill sizes="(min-width: 768px) 26rem, 100vw" className="object-cover" priority={false} />
+            <div className="relative h-28 overflow-hidden bg-espresso min-[400px]:h-32 sm:h-40 lg:h-auto lg:min-h-[36rem] [@media(max-height:740px)_and_(max-width:1023px)]:hidden">
+              <Image src={images.quotePopup.src} alt="" fill sizes="(min-width: 1024px) 28rem, 100vw" className="object-cover" priority={false} />
               <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/30 to-espresso/10" />
-              <div className="absolute inset-x-0 bottom-0 p-5 text-cream md:p-8">
-                <Image src="/images/brand/logo-mark.png" alt="Build Smart" width={70} height={48} className="h-9 w-auto md:h-12" />
-                <p className="mt-3 hidden font-display text-[1.7rem] leading-tight md:block">Designing spaces for a better tomorrow.</p>
-                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.72rem] text-cream/85 md:mt-5 md:flex-col md:gap-2 md:text-sm">
+              <div className="absolute inset-x-0 bottom-0 p-5 text-cream lg:p-8">
+                <Image src="/images/brand/logo-mark.png" alt="Build Smart" width={70} height={48} className="h-8 w-auto lg:h-12" />
+                <p className="mt-3 hidden font-display text-[1.7rem] leading-tight lg:block">Designing spaces for a better tomorrow.</p>
+                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.72rem] text-cream/85 lg:mt-5 lg:flex-col lg:gap-2 lg:text-sm">
                   <li className="inline-flex items-center gap-1.5">
                     <BadgeCheck className="size-4 text-gold" /> Free consultation, no obligation
                   </li>
                   <li className="inline-flex items-center gap-1.5">
-                    <Clock3 className="size-4 text-gold" /> Takes under a minute
+                    <Clock3 className="size-4 text-gold" /> Quick call-back from our team
                   </li>
                 </ul>
               </div>
@@ -155,7 +155,7 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
 
             <div className="px-5 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-8">
               {open && (
-                <ConsultationForm key={formKey} variant="quick" source={source} title={site.leadPopup.title} intro={site.leadPopup.intro} />
+                <ConsultationForm key={formKey} variant="full" source={source} title={site.leadPopup.title} intro={site.leadPopup.intro} />
               )}
               <button type="button" onClick={close} className="mx-auto mt-3 block min-h-11 px-4 text-sm font-medium text-muted underline-offset-4 hover:text-espresso hover:underline">
                 Maybe later

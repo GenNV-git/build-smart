@@ -58,7 +58,7 @@ export function ConsultationForm({
 }: {
   /**
    * compact: hero card (core fields + message). full: every field, two-column on larger screens.
-   * quick: the 4 required fields only — used by the timed pop-up.
+   * quick: the 4 required fields only (not used at the moment — the timed pop-up shows the full form).
    */
   variant?: "compact" | "full" | "quick";
   source: string;
@@ -168,7 +168,7 @@ export function ConsultationForm({
 
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate aria-describedby={id("intro")} className="relative">
-      <H className={`${quick ? "pr-8 text-[1.6rem] sm:text-[1.85rem]" : "text-[1.75rem] sm:text-[2rem]"} leading-tight text-espresso`}>{title}</H>
+      <H className={`${quick ? "text-[1.6rem] sm:text-[1.85rem]" : "text-[1.75rem] sm:text-[2rem]"} pr-10 leading-tight text-espresso`}>{title}</H>
       <p id={id("intro")} className="mt-2 text-sm leading-relaxed text-muted">
         {intro}
       </p>
