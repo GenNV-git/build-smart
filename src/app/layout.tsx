@@ -52,7 +52,7 @@ const jsonLd = {
   description: site.seoDescription,
   founder: {
     "@type": "Person",
-    name: site.founder.name,
+    name: site.founder.fullName,
     sameAs: [site.founderSocial.instagram, site.founderSocial.youtube].filter(isSet),
   },
   ...(isSet(site.contact.phone) ? { telephone: site.contact.phone } : {}),

@@ -32,9 +32,9 @@ export const videos: Video[] = [
     subtitle: "Keys to a finished home",
     category: "handover",
     platform: "instagram",
-    url: "https://www.instagram.com/reel/DcqmCEIT5jm/",
-    // Cover picture for the card (re-uses the handover photo already on the site — no extra files).
-    thumbnail: { src: "/images/projects/project-02/cover.jpg", alt: "Handing over the completed home to the family", position: "50% 30%", temporary: false },
+    url: "https://www.instagram.com/reel/DdRJMs1zWOU/",
+    // Cover picture: the same family's handover photo (Project 01) — keep the reel and photo from the same client.
+    thumbnail: { src: "/images/projects/project-01/cover.jpg", alt: "The Build Smart team celebrating a home handover with the family", position: "50% 35%", temporary: false },
     orientation: "portrait",
     featured: true,
   },

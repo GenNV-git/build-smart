@@ -65,8 +65,10 @@ export type Project = {
   cover: ImageAsset;
   gallery: ProjectGalleryItem[];
   beforeAfter: { before: ImageAsset; after: ImageAsset; caption?: string }[];
-  /** YouTube URL of the walkthrough / progress video. Empty = polished placeholder. */
+  /** Walkthrough / progress video — YouTube, Instagram Reel or Google Drive link. Empty = not shown. */
   walkthroughVideoUrl: string;
+  /** Handover video for this project — Instagram Reel, YouTube or Google Drive link. Shown when there's no walkthrough. */
+  handoverVideoUrl?: string;
   /** id from testimonials.ts */
   testimonialId?: string;
   featured: boolean;

@@ -9,7 +9,8 @@ import type { Project } from "./types";
  *  1. Put photographs in /public/images/projects/<slug>/ (landscape, ≥ 2000px wide, JPG/WebP).
  *  2. Replace `cover` and `gallery` paths and set `temporary: false`.
  *  3. Fill in name, location, year, overview, scope and concept with real, approved details.
- *  4. Paste the YouTube walkthrough URL into `walkthroughVideoUrl`.
+ *  4. Paste the walkthrough video link into `walkthroughVideoUrl` and/or the handover Reel link into `handoverVideoUrl`
+ *     (YouTube, Instagram Reel or Google Drive links all play on the page).
  *  5. Add before/after pairs only when real photos exist.
  *
  * Empty fields are hidden automatically. Nothing here should be invented.
@@ -36,6 +37,7 @@ export const projects: Project[] = [
     ],
     beforeAfter: [],
     walkthroughVideoUrl: "",
+    handoverVideoUrl: "https://www.instagram.com/reel/DdRJMs1zWOU/", // this family's handover reel
     testimonialId: "testimonial-01",
     featured: true,
   },
@@ -60,6 +62,7 @@ export const projects: Project[] = [
     ],
     beforeAfter: [],
     walkthroughVideoUrl: "",
+    handoverVideoUrl: "", // paste this family's handover Reel link here
     testimonialId: "testimonial-02",
     featured: true,
   },

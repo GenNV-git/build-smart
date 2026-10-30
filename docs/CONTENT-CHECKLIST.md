@@ -4,7 +4,8 @@ Nothing on the site invents business facts. Everything below is either hidden, s
 
 ## Contact & profiles — `src/content/site.ts` and environment
 - [x] Phone & WhatsApp: +91 77088 56606
-- [ ] Email, studio address, working hours, service area → `site.contact`
+- [x] Email: sanjay@buildsmart.org.in · Owner: Sanjay K
+- [ ] Studio address, working hours, service area → `site.contact`
 - [x] Instagram (@_build_smart_ and Sanjay's @buildwithsanjay), YouTube, Facebook, LinkedIn
 - [ ] Registered business name, if different → `site.legalName`
 - [ ] Confirm the completed-project count (`site.stats.completedProjects`, currently "2+")
@@ -48,4 +49,5 @@ For **Project 01** and **Project 02**:
 Every image slot in `public/images/` (hero, about, banners, services, projects, journey, videos, testimonials) currently holds a stand-in upscaled from the approved design mockup. Replace each file with a real Build Smart photo **using the same file name** — see `docs/HOW-TO-UPDATE.md` for the full list and sizes. Also add Sanjay's portrait (`public/images/founder/sanjay.jpg`) and regenerate `public/images/og-image.jpg` (1200 × 630).
 
 ## Legal
-- [ ] Have the Privacy Policy and Terms reviewed; add the registered business name and contact email.
+- [x] Privacy Policy and Terms written (India's DPDP Act, Google Sheets enquiries, owner and contact details)
+- [ ] Optional: a lawyer's review; set `site.legalName` if the business is registered under a different name

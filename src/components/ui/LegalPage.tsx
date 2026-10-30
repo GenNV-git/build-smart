@@ -11,7 +11,7 @@ export function LegalPage({ title, updated, children }: { title: string; updated
         </div>
       </section>
       <article className="container-lux prose-lux max-w-3xl py-16 text-[0.97rem] text-ink sm:py-20">
-        <DevNote className="mb-8">Template text — have it reviewed and add the registered business name and contact details before launch.</DevNote>
+        <DevNote className="mb-8">Ready to publish. If the business is registered under a different name, set site.legalName in src/content/site.ts — it appears here automatically. Have a lawyer glance over it if you can.</DevNote>
         {children}
       </article>
     </>

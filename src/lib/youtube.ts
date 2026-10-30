@@ -36,7 +36,7 @@ export function isInstagramUrl(url?: string | null): boolean {
 
 /**
  * Instagram's official embed player for a Reel / post link, e.g.
- * https://www.instagram.com/reel/DcqmCEIT5jm/?utm_source=… → https://www.instagram.com/reel/DcqmCEIT5jm/embed/
+ * https://www.instagram.com/reel/AbC123xyz/?utm_source=… → https://www.instagram.com/reel/AbC123xyz/embed/
  * The video streams from Instagram — nothing is downloaded or stored on this website.
  */
 export function instagramEmbed(url?: string | null): { embedUrl: string; postUrl: string } | null {

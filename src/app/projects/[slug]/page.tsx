@@ -12,7 +12,7 @@ import { TestimonialCard } from "@/components/video/TestimonialCard";
 import { BeforeAfter } from "@/components/video/BeforeAfter";
 import { DevNote, TempImageTag } from "@/components/ui/DevNote";
 import { CtaBanner } from "@/components/layout/CtaBanner";
-import { youtubeId } from "@/lib/youtube";
+import { driveEmbed, instagramEmbed, youtubeId } from "@/lib/youtube";
 
 type Params = { slug: string };
 
@@ -47,7 +47,14 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
     { k: "Location", v: project.location },
     { k: "Completed", v: project.year },
   ].filter((f) => isSet(f.v));
-  const hasWalkthrough = !!youtubeId(project.walkthroughVideoUrl);
+  // Walkthrough first; otherwise the handover Reel. Any YouTube, Instagram or Google Drive link plays on the page.
+  const playable = (u?: string) => !!(youtubeId(u) || instagramEmbed(u) || driveEmbed(u));
+  const film = playable(project.walkthroughVideoUrl)
+    ? { kind: "walkthrough" as const, url: project.walkthroughVideoUrl }
+    : playable(project.handoverVideoUrl)
+      ? { kind: "handover" as const, url: project.handoverVideoUrl! }
+      : null;
+  const filmLandscape = !!film && !!youtubeId(film.url) && !/\/shorts\//.test(film.url);
 
   return (
     <>
@@ -175,22 +182,24 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
       <section aria-labelledby="film-title" className="py-14 sm:py-20 lg:py-28">
         <div className="container-lux grid gap-12 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
           <div data-reveal>
-            <p className="eyebrow">Walkthrough</p>
+            <p className="eyebrow">{film?.kind === "handover" ? "Handover" : "Walkthrough"}</p>
             <h2 id="film-title" className="mt-4 text-4xl text-espresso sm:text-5xl">
-              See it in motion.
+              {film?.kind === "handover" ? "The day we handed over the keys." : "See it in motion."}
             </h2>
             <div className="mt-10">
-              {hasWalkthrough ? (
+              {film ? (
                 <VideoCard
                   size="featured"
                   video={{
-                    id: `${project.slug}-walkthrough`,
-                    title: `${project.name} walkthrough`,
-                    subtitle: project.name,
-                    category: "progress",
-                    platform: "youtube",
-                    url: project.walkthroughVideoUrl,
-                    orientation: "landscape",
+                    id: `${project.slug}-${film.kind}`,
+                    title: film.kind === "handover" ? "Project handover" : `${project.name} walkthrough`,
+                    subtitle: film.kind === "handover" ? "Watch the family receive their finished home" : project.name,
+                    category: film.kind === "handover" ? "handover" : "progress",
+                    platform: youtubeId(film.url) ? "youtube" : "instagram",
+                    url: film.url,
+                    // YouTube supplies its own cover picture; Instagram and Drive use the project photo.
+                    thumbnail: youtubeId(film.url) ? undefined : { src: project.cover.src, alt: project.cover.alt, position: project.cover.position },
+                    orientation: filmLandscape ? "landscape" : "portrait",
                   }}
                 />
               ) : (

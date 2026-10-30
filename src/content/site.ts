@@ -20,14 +20,15 @@ export const site = {
   url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
 
   founder: {
-    name: "Sanjay",
+    name: "Sanjay", // used across the site ("About Sanjay")
+    fullName: "Sanjay K", // owner — used on the Privacy Policy / Terms and in Google's business details
     title: "Founder, Build Smart",
   },
 
   /** Contact details — shown only when filled in. */
   contact: {
     phone: "+91 77088 56606", // used for "Call" buttons
-    email: "", // e.g. "hello@buildsmart.in"
+    email: "sanjay@buildsmart.org.in", // shown in the footer, contact page and legal pages
     address: "", // studio / office address
     serviceArea: "", // e.g. "Chennai and surrounding areas" — only once confirmed
     hours: "", // e.g. "Mon – Sat, 9:30 am – 7:00 pm"
