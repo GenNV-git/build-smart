@@ -14,9 +14,23 @@ import type { LeadRecord } from "./types";
  */
 export type StorageResult = { stored: boolean; driver: string };
 
+/** Values pasted into hosting dashboards often carry quotes or spaces — strip them. */
+const env = (name: string) => (process.env[name] || "").trim().replace(/^["']|["']$/g, "").trim();
+
+/** Which storage is active and whether the Google Sheet settings are present (never reveals the values). */
+export function storageStatus() {
+  const webhookUrl = env("LEAD_WEBHOOK_URL");
+  const driver = env("LEAD_STORAGE").toLowerCase() || (webhookUrl ? "webhook" : "file");
+  return {
+    driver,
+    webhookUrl,
+    secret: env("LEAD_WEBHOOK_SECRET"),
+    serverless: !!(process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME),
+  };
+}
+
 export async function storeLead(lead: LeadRecord): Promise<StorageResult> {
-  const webhookUrl = (process.env.LEAD_WEBHOOK_URL || "").trim();
-  const driver = (process.env.LEAD_STORAGE || "").trim().toLowerCase() || (webhookUrl ? "webhook" : "file");
+  const { driver, webhookUrl, secret, serverless } = storageStatus();
 
   if (driver === "mock") {
     console.info(`[leads] mock storage — enquiry ${lead.id} accepted but not stored`);
@@ -29,10 +43,10 @@ export async function storeLead(lead: LeadRecord): Promise<StorageResult> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(process.env.LEAD_WEBHOOK_SECRET ? { "X-Build-Smart-Secret": process.env.LEAD_WEBHOOK_SECRET } : {}),
+        ...(secret ? { "X-Build-Smart-Secret": secret } : {}),
       },
       // The secret is sent both as a header and in the body (Google Apps Script cannot read request headers).
-      body: JSON.stringify({ type: "website_enquiry", secret: process.env.LEAD_WEBHOOK_SECRET || undefined, lead }),
+      body: JSON.stringify({ type: "website_enquiry", secret: secret || undefined, lead }),
       redirect: "follow", // Google Apps Script answers through a redirect
       signal: AbortSignal.timeout(15_000),
       cache: "no-store",
@@ -65,6 +79,12 @@ export async function storeLead(lead: LeadRecord): Promise<StorageResult> {
   }
 
   // default: file
+  if (serverless) {
+    throw new Error(
+      "LEAD_WEBHOOK_URL is not set on this server, so there is nowhere to save enquiries (hosts like Vercel can't keep files). " +
+        "Add LEAD_WEBHOOK_URL and LEAD_WEBHOOK_SECRET in the hosting settings (Vercel → Settings → Environment Variables → Production) and redeploy.",
+    );
+  }
   const file = path.resolve(/*turbopackIgnore: true*/ process.cwd(), process.env.LEAD_FILE_PATH || "data/leads.jsonl");
   const publicDir = path.resolve(/*turbopackIgnore: true*/ process.cwd(), "public");
   if (file.startsWith(publicDir)) throw new Error("LEAD_FILE_PATH must not be inside /public");

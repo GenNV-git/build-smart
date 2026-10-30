@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { randomUUID } from "node:crypto";
 import { leadSchema, fieldErrorsFrom } from "@/lib/lead-schema";
-import { storeLead } from "@/lib/leads/storage";
+import { storageStatus, storeLead } from "@/lib/leads/storage";
 import { notifyOwnerOnWhatsApp } from "@/lib/leads/whatsapp";
 import { rateLimited } from "@/lib/leads/rate-limit";
 import type { LeadRecord } from "@/lib/leads/types";
@@ -10,6 +10,31 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const noStore = { "Cache-Control": "no-store" };
+
+/**
+ * GET /api/leads — a quick health check for the owner: open https://<your-site>/api/leads in a browser.
+ * Shows whether the Google Sheet settings are present on this server. Never reveals the link or the secret.
+ */
+export async function GET() {
+  const st = storageStatus();
+  const linkLooksRight = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(st.webhookUrl);
+  const problems: string[] = [];
+  if (!st.webhookUrl) problems.push("LEAD_WEBHOOK_URL is missing — add it in the hosting settings and redeploy.");
+  else if (!linkLooksRight) problems.push("LEAD_WEBHOOK_URL doesn't look like an Apps Script web-app link (https://script.google.com/macros/s/…/exec).");
+  if (!st.secret) problems.push("LEAD_WEBHOOK_SECRET is missing — add it in the hosting settings and redeploy.");
+  if (st.driver === "file" && st.serverless) problems.push("Enquiries can't be saved: this host can't keep files, so the Google Sheet link is required.");
+  return NextResponse.json(
+    {
+      ready: problems.length === 0,
+      savesTo: st.driver === "webhook" ? "Google Sheet" : st.driver === "file" ? "file on the server (data/leads.jsonl)" : st.driver,
+      googleSheetLinkSet: !!st.webhookUrl,
+      googleSheetLinkLooksRight: linkLooksRight,
+      secretSet: !!st.secret,
+      problems,
+    },
+    { headers: noStore },
+  );
+}
 
 /**
  * POST /api/leads — consultation enquiries.
@@ -77,8 +102,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, id: lead.id }, { status: 201, headers: noStore });
-}
-
-export function GET() {
-  return NextResponse.json({ ok: false, error: "Method not allowed." }, { status: 405, headers: { Allow: "POST" } });
 }
