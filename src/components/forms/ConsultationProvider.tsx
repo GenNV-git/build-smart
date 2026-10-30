@@ -27,7 +27,17 @@ function visitorIsBusy() {
   return false;
 }
 
+/** ?show-quote in the address forces the pop-up (for testing) — ignores the once-per-visit and after-enquiry rules. */
+function forcedForTesting(): boolean {
+  try {
+    return new URLSearchParams(window.location.search).has("show-quote");
+  } catch {
+    return false;
+  }
+}
+
 function alreadyHandled(): boolean {
+  if (forcedForTesting()) return false;
   try {
     if (sessionStorage.getItem(SHOWN_KEY) === "1") return true;
     const sent = Number(localStorage.getItem(SENT_KEY) || 0);
@@ -105,12 +115,12 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
       {children}
       <dialog
         ref={dialogRef}
-        className={`consult-dialog overflow-y-auto outline-none overscroll-contain border border-white/70 bg-ivory p-0 text-ink shadow-[0_40px_90px_-30px_rgb(0_0_0/0.6)] ${
+        className={`consult-dialog overflow-y-auto outline-none overscroll-contain border bg-ivory p-0 text-ink shadow-[0_40px_90px_-30px_rgb(0_0_0/0.6)] ${
           auto
-            ? // centred card on every screen size
-              "m-auto max-h-[calc(100dvh-2rem)] w-[min(66rem,calc(100vw-2rem))] max-w-none rounded-[1.5rem]"
+            ? // centred card: compact on phones, wider with a photo column on large screens
+              "is-auto no-scrollbar m-auto max-h-[calc(100dvh-2.5rem)] w-[min(23.5rem,calc(100vw-2.5rem))] max-w-none rounded-[1.6rem] border-gold/30 sm:w-[min(38rem,calc(100vw-3rem))] lg:max-h-[calc(100dvh-2rem)] lg:w-[min(66rem,calc(100vw-2rem))] lg:rounded-[1.5rem] lg:border-white/70"
             : // bottom sheet on phones, centred card from tablet up
-              "mx-0 mb-0 mt-auto max-h-[92dvh] w-full max-w-none rounded-t-[1.6rem] sm:m-auto sm:max-h-[calc(100dvh-1.5rem)] sm:w-[min(40rem,calc(100vw-1.5rem))] sm:rounded-[1.6rem]"
+              "border-white/70 mx-0 mb-0 mt-auto max-h-[92dvh] w-full max-w-none rounded-t-[1.6rem] sm:m-auto sm:max-h-[calc(100dvh-1.5rem)] sm:w-[min(40rem,calc(100vw-1.5rem))] sm:rounded-[1.6rem]"
         }`}
         aria-labelledby="consult-dialog-title"
         tabIndex={-1}
@@ -122,8 +132,10 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
         <button
           type="button"
           onClick={close}
-          className={`absolute right-3 top-3 z-10 grid size-11 place-items-center rounded-full transition ${
-            auto ? "bg-espresso/55 text-cream backdrop-blur hover:bg-espresso/75 lg:bg-transparent lg:text-chocolate/70 lg:backdrop-blur-none lg:hover:bg-chocolate/5" : "text-chocolate/70 hover:bg-chocolate/5 hover:text-espresso"
+          className={`absolute z-10 grid place-items-center rounded-full transition ${
+            auto
+              ? "right-3 top-3 size-10 bg-white/10 text-cream ring-1 ring-white/15 backdrop-blur-sm hover:bg-white/20 lg:right-3 lg:top-3 lg:size-11 lg:bg-transparent lg:text-chocolate/70 lg:ring-0 lg:backdrop-blur-none lg:hover:bg-chocolate/5"
+              : "right-3 top-3 size-11 text-chocolate/70 hover:bg-chocolate/5 hover:text-espresso"
           }`}
           aria-label="Close"
         >
@@ -135,14 +147,14 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
 
         {auto ? (
           <div className="grid lg:grid-cols-[0.72fr_1.28fr]">
-            {/* Photo panel — slim strip on phones, full column on larger screens */}
-            <div className="relative h-28 overflow-hidden bg-espresso min-[400px]:h-32 sm:h-40 lg:h-auto lg:min-h-[36rem] [@media(max-height:740px)_and_(max-width:1023px)]:hidden">
-              <Image src={images.quotePopup.src} alt="" fill sizes="(min-width: 1024px) 28rem, 100vw" className="object-cover" priority={false} />
+            {/* Large screens: photo column */}
+            <div className="relative hidden overflow-hidden bg-espresso lg:block lg:min-h-[36rem]">
+              <Image src={images.quotePopup.src} alt="" fill sizes="28rem" className="object-cover" priority={false} />
               <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/30 to-espresso/10" />
-              <div className="absolute inset-x-0 bottom-0 p-5 text-cream lg:p-8">
-                <Image src="/images/brand/logo-mark.png" alt="Build Smart" width={70} height={48} className="h-8 w-auto lg:h-12" />
-                <p className="mt-3 hidden font-display text-[1.7rem] leading-tight lg:block">Designing spaces for a better tomorrow.</p>
-                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.72rem] text-cream/85 lg:mt-5 lg:flex-col lg:gap-2 lg:text-sm">
+              <div className="absolute inset-x-0 bottom-0 p-8 text-cream">
+                <Image src="/images/brand/logo-mark.png" alt="Build Smart" width={70} height={48} className="h-12 w-auto" />
+                <p className="mt-3 font-display text-[1.7rem] leading-tight">Designing spaces for a better tomorrow.</p>
+                <ul className="mt-5 flex flex-col gap-2 text-sm text-cream/85">
                   <li className="inline-flex items-center gap-1.5">
                     <BadgeCheck className="size-4 text-gold" /> Free consultation, no obligation
                   </li>
@@ -153,11 +165,43 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
               </div>
             </div>
 
-            <div className="px-5 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-8">
+            {/* Phones & tablets: slim branded header */}
+            <div className="relative overflow-hidden bg-espresso px-5 pb-4 pt-4 text-cream sm:px-8 sm:pb-6 sm:pt-7 lg:hidden">
+              <Image src={images.quotePopup.src} alt="" fill sizes="38rem" className="object-cover opacity-35" priority={false} />
+              <div className="absolute inset-0 bg-[linear-gradient(115deg,rgb(31_24_19/0.97)_35%,rgb(31_24_19/0.72)_100%)]" />
+              <div className="absolute -right-10 -top-16 size-44 rounded-full bg-gold/15 blur-3xl" aria-hidden="true" />
+              <div className="relative pr-10">
+                <div className="flex items-center gap-2.5">
+                  <Image src="/images/brand/logo-mark.png" alt="Build Smart" width={70} height={48} className="h-6 w-auto sm:h-7" />
+                  <span className="h-3.5 w-px bg-cream/25" aria-hidden="true" />
+                  <span className="text-[0.6rem] font-semibold uppercase tracking-[0.24em] text-gold sm:text-[0.65rem]">Free consultation</span>
+                </div>
+                <p className="mt-2.5 font-display text-[1.8rem] leading-[1.05] sm:mt-3 sm:text-[2.2rem]">{site.leadPopup.title}</p>
+                <p className="mt-1.5 text-[0.8rem] leading-relaxed text-cream/70 sm:mt-2 sm:text-sm">
+                  <span className="sm:hidden">Share a few details — we&apos;ll call you back.</span>
+                  <span className="hidden sm:inline">{site.leadPopup.intro}</span>
+                </p>
+              </div>
+              <span className="quote-header-shine absolute inset-x-0 bottom-0 h-px" aria-hidden="true" />
+            </div>
+
+            <div className="relative px-5 pb-3 pt-4 sm:px-8 sm:pb-6 sm:pt-6 lg:pb-8 lg:pt-8">
               {open && (
-                <ConsultationForm key={formKey} variant="full" source={source} title={site.leadPopup.title} intro={site.leadPopup.intro} />
+                <ConsultationForm
+                  key={formKey}
+                  variant="full"
+                  dense
+                  headingClassName="hidden lg:block"
+                  source={source}
+                  title={site.leadPopup.title}
+                  intro={site.leadPopup.intro}
+                />
               )}
-              <button type="button" onClick={close} className="mx-auto mt-3 block min-h-11 px-4 text-sm font-medium text-muted underline-offset-4 hover:text-espresso hover:underline">
+              <button
+                type="button"
+                onClick={close}
+                className="mx-auto mt-0.5 block min-h-9 px-4 text-[0.78rem] font-medium text-muted underline-offset-4 hover:text-espresso hover:underline lg:mt-3 lg:min-h-11 lg:text-sm"
+              >
                 Maybe later
               </button>
             </div>

@@ -70,15 +70,16 @@ export const site = {
     completedProjects: "2+",
   },
 
-  /** Consultation popup. Disabled by default because the hero already shows the form. */
   /**
    * "Get a Free Quote" pop-up that appears in the centre of the screen after a few seconds.
    * Shown at most once per visit; never on the contact/legal pages; never while the visitor is
-   * typing or has a menu/video open; and never again for someone who has already sent an enquiry.
+   * typing or has a menu/video open; and not again for someone who has already sent an enquiry.
+   * To see it any time while testing, open the site with ?show-quote at the end,
+   * e.g. http://localhost:3000/?show-quote or https://www.buildsmart.org.in/?show-quote
    */
   leadPopup: {
     enabled: true,
-    delayMs: 8000, // 8 seconds after the visitor arrives (8000 = 8 s, 15000 = 15 s …)
+    delayMs: 15000, // 15 seconds after the visitor arrives (8000 = 8 s, 15000 = 15 s …)
     title: "Get a Free Quote",
     intro: "Tell us a little about your project — we'll call you back to plan it together.",
     /** Days to stay quiet after someone sends an enquiry. */

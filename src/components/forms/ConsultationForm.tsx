@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -55,6 +55,8 @@ export function ConsultationForm({
   title = "Let's Plan Your Dream Space",
   intro = "Share a few details and our team will get in touch for an initial consultation.",
   headingLevel = "h2",
+  dense = false,
+  headingClassName = "",
 }: {
   /**
    * compact: hero card (core fields + message). full: every field, two-column on larger screens.
@@ -65,6 +67,10 @@ export function ConsultationForm({
   title?: string;
   intro?: string;
   headingLevel?: "h2" | "h3";
+  /** Compact layout for the pop-up: tighter fields; on phones Budget + Best time sit side by side with short labels. */
+  dense?: boolean;
+  /** Extra classes for the heading + intro (e.g. "hidden lg:block" when the pop-up shows its own header). */
+  headingClassName?: string;
 }) {
   const uid = useId();
   const formRef = useRef<HTMLFormElement>(null);
@@ -78,6 +84,27 @@ export function ConsultationForm({
   const quick = variant === "quick";
 
   const id = (f: string) => `${uid}-${f}`;
+
+  // Phones in dense mode: short option labels so Budget and Best time fit side by side (the saved values stay in full).
+  const [narrow, setNarrow] = useState(false);
+  const [tiny, setTiny] = useState(false); // phones narrower than 380px
+  useEffect(() => {
+    if (!dense) return;
+    const mq = window.matchMedia("(max-width: 639px)");
+    const mqTiny = window.matchMedia("(max-width: 379px)");
+    const update = () => {
+      setNarrow(mq.matches);
+      setTiny(mqTiny.matches);
+    };
+    update();
+    mq.addEventListener("change", update);
+    mqTiny.addEventListener("change", update);
+    return () => {
+      mq.removeEventListener("change", update);
+      mqTiny.removeEventListener("change", update);
+    };
+  }, [dense]);
+  const pair = dense && narrow; // Budget + Best time on one row
 
   function set<K extends keyof Values>(key: K, value: Values[K]) {
     setValues((v) => ({ ...v, [key]: value }));
@@ -167,11 +194,13 @@ export function ConsultationForm({
   const describedBy = (k: keyof LeadFieldErrors) => (errors[k] ? id(`${k}-error`) : undefined);
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate aria-describedby={id("intro")} className="relative">
-      <H className={`${quick ? "text-[1.6rem] sm:text-[1.85rem]" : "text-[1.75rem] sm:text-[2rem]"} pr-10 leading-tight text-espresso`}>{title}</H>
-      <p id={id("intro")} className="mt-2 text-sm leading-relaxed text-muted">
-        {intro}
-      </p>
+    <form ref={formRef} onSubmit={onSubmit} noValidate aria-describedby={id("intro")} className={`relative ${dense ? "form-dense" : ""}`}>
+      <div className={headingClassName}>
+        <H className={`${quick ? "text-[1.6rem] sm:text-[1.85rem]" : "text-[1.75rem] sm:text-[2rem]"} pr-10 leading-tight text-espresso`}>{title}</H>
+        <p id={id("intro")} className="mt-2 text-sm leading-relaxed text-muted">
+          {intro}
+        </p>
+      </div>
 
       {status === "error" && serverError && (
         <div role="alert" className="mt-5 rounded-xl border border-[#b4532a]/30 bg-[#b4532a]/[0.06] px-4 py-3 text-sm text-[#8a3b1b]">
@@ -179,8 +208,10 @@ export function ConsultationForm({
         </div>
       )}
 
-      <div className={`${quick ? "mt-5 gap-3" : "mt-6 gap-3.5"} grid ${full ? "sm:grid-cols-2" : ""}`}>
-        <Field id={id("name")} label="Full name" required icon={User} error={errors.name}>
+      <div
+        className={`grid ${dense ? "mt-1 gap-2.5 sm:gap-3 lg:mt-6" : quick ? "mt-5 gap-3" : "mt-6 gap-3.5"} ${pair ? "grid-cols-2" : ""} ${full ? "sm:grid-cols-2" : ""}`}
+      >
+        <Field className={pair ? "col-span-2" : ""} id={id("name")} label="Full name" required icon={User} error={errors.name}>
           <input
             id={id("name")}
             name="name"
@@ -198,7 +229,7 @@ export function ConsultationForm({
           />
         </Field>
 
-        <Field id={id("phone")} label="Phone / WhatsApp number" required icon={Phone} error={errors.phone}>
+        <Field className={pair ? "col-span-2" : ""} id={id("phone")} label="Phone / WhatsApp number" required icon={Phone} error={errors.phone}>
           <input
             id={id("phone")}
             name="phone"
@@ -217,7 +248,7 @@ export function ConsultationForm({
           />
         </Field>
 
-        <Field id={id("projectType")} label="Project type" required icon={LayoutGrid} error={errors.projectType} select>
+        <Field className={pair ? "col-span-2" : ""} id={id("projectType")} label="Project type" required icon={LayoutGrid} error={errors.projectType} select>
           <select
             id={id("projectType")}
             name="projectType"
@@ -239,7 +270,7 @@ export function ConsultationForm({
           </select>
         </Field>
 
-        <Field id={id("location")} label="City / project location" required icon={MapPin} error={errors.location}>
+        <Field className={pair ? "col-span-2" : ""} id={id("location")} label="City / project location" required icon={MapPin} error={errors.location}>
           <input
             id={id("location")}
             name="location"
@@ -269,10 +300,10 @@ export function ConsultationForm({
                 aria-invalid={!!errors.budget}
                 aria-describedby={describedBy("budget")}
               >
-                <option value="">Budget (optional)</option>
+                <option value="">{pair ? "Budget" : "Budget (optional)"}</option>
                 {site.form.budgets.map((o) => (
                   <option key={o} value={o} className="text-ink">
-                    {o}
+                    {pair ? shortBudget(o) : o}
                   </option>
                 ))}
               </select>
@@ -287,10 +318,10 @@ export function ConsultationForm({
                 aria-invalid={!!errors.contactTime}
                 aria-describedby={describedBy("contactTime")}
               >
-                <option value="">Best Time to Call (optional)</option>
+                <option value="">{pair ? (tiny ? "Time" : "Best time") : dense ? "Best time to call" : "Best Time to Call (optional)"}</option>
                 {site.form.contactTimes.map((o) => (
                   <option key={o} value={o} className="text-ink">
-                    {o}
+                    {pair ? o.replace(/\s*\(.*\)$/, "") : o}
                   </option>
                 ))}
               </select>
@@ -304,13 +335,13 @@ export function ConsultationForm({
           label="Your message (optional)"
           icon={MessageSquareText}
           error={errors.message}
-          className={full ? "sm:col-span-2" : ""}
+          className={`${pair ? "col-span-2" : ""} ${full ? "sm:col-span-2" : ""}`}
           textarea
         >
           <textarea
             id={id("message")}
             name="message"
-            rows={full ? 4 : 3}
+            rows={dense ? 2 : full ? 4 : 3}
             className="field"
             placeholder="Your Message (Optional)"
             value={values.message}
@@ -331,8 +362,8 @@ export function ConsultationForm({
         </label>
       </div>
 
-      <div className="mt-4">
-        <label className="flex cursor-pointer items-start gap-3 text-[0.8rem] leading-relaxed text-muted">
+      <div className={dense ? "mt-3.5" : "mt-4"}>
+        <label className={`flex cursor-pointer items-start gap-3 leading-relaxed text-muted ${dense ? "text-[0.74rem] sm:text-[0.8rem]" : "text-[0.8rem]"}`}>
           <input
             type="checkbox"
             name="consent"
@@ -343,12 +374,13 @@ export function ConsultationForm({
             className="mt-0.5 size-4 shrink-0 accent-[#94702f]"
           />
           <span>
-            I agree that Build Smart may contact me by phone or WhatsApp about this enquiry. My details are used only
-            for this purpose — see the{" "}
+            {dense
+              ? "I agree that Build Smart may call or WhatsApp me about this enquiry (see our "
+              : "I agree that Build Smart may contact me by phone or WhatsApp about this enquiry. My details are used only for this purpose — see the "}
             <Link href="/privacy-policy" className="font-medium text-chocolate underline underline-offset-2 hover:text-gold-deep">
               Privacy Policy
             </Link>
-            .
+            {dense ? ")." : "."}
           </span>
         </label>
         {errors.consent && (
@@ -358,7 +390,7 @@ export function ConsultationForm({
         )}
       </div>
 
-      <button type="submit" className="btn btn-gold mt-5 w-full" disabled={status === "submitting"} aria-busy={status === "submitting"}>
+      <button type="submit" className={`btn btn-gold w-full ${dense ? "mt-4" : "mt-5"}`} disabled={status === "submitting"} aria-busy={status === "submitting"}>
         {status === "submitting" ? (
           <>
             <Loader2 className="size-4 animate-spin" /> Sending…
@@ -370,8 +402,9 @@ export function ConsultationForm({
         )}
       </button>
 
-      <p className="mt-3.5 flex items-center justify-center gap-1.5 text-[0.72rem] text-muted">
-        <ShieldCheck className="size-3.5 text-[#4f8a55]" /> We respect your privacy. Your details are used only for your consultation.
+      <p className={`flex items-center justify-center gap-1.5 text-center text-muted ${dense ? "mt-3 text-[0.68rem] sm:text-[0.72rem]" : "mt-3.5 text-[0.72rem]"}`}>
+        <ShieldCheck className="size-3.5 shrink-0 text-[#4f8a55]" />
+        {dense ? "Your details stay private — never shared." : "We respect your privacy. Your details are used only for your consultation."}
       </p>
     </form>
   );
@@ -406,13 +439,13 @@ function Field({
       </label>
       <div className="relative">
         <Icon
-          className={`pointer-events-none absolute left-3.5 size-[1.05rem] text-chocolate/55 ${textarea ? "top-3.5" : "top-1/2 -translate-y-1/2"}`}
+          className={`field-icon pointer-events-none absolute left-3.5 size-[1.05rem] text-chocolate/55 ${textarea ? "top-3.5" : "top-1/2 -translate-y-1/2"}`}
           strokeWidth={1.6}
           aria-hidden="true"
         />
         {children}
         {select && (
-          <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-chocolate/60" aria-hidden="true" />
+          <ChevronDown className="field-chevron pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-chocolate/60" aria-hidden="true" />
         )}
       </div>
       {error && (
@@ -422,4 +455,13 @@ function Field({
       )}
     </div>
   );
+}
+
+/** "₹50 Lakh – ₹1 Crore" → "₹50L–1Cr" for the narrow pop-up layout (only the label changes, not the saved value). */
+function shortBudget(o: string): string {
+  return o
+    .replace(/\s*–\s*₹?/g, "–")
+    .replace(/\s*Lakh/gi, "L")
+    .replace(/\s*Crore/gi, "Cr")
+    .replace(/Not sure yet/i, "Not sure");
 }
