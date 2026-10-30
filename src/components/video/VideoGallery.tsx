@@ -37,7 +37,7 @@ export function VideoGallery({ videos }: { videos: Video[] }) {
       <ul className="mt-10 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4" aria-live="polite">
         {shown.map((v) => (
           <li key={v.id}>
-            <VideoCard video={{ ...v, orientation: "portrait" }} sizes="(min-width: 1024px) 22vw, (min-width: 768px) 30vw, 45vw" />
+            <VideoCard video={v} sizes="(min-width: 1024px) 22vw, (min-width: 768px) 30vw, 45vw" />
           </li>
         ))}
       </ul>

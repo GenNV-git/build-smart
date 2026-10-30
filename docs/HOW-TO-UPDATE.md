@@ -162,7 +162,10 @@ Example — `src/content/videos.ts`:
 
 What happens:
 - **YouTube** links play right on the website in a pop-up player (the player loads only when tapped, so the site stays fast). If you remove the `thumbnail` line, YouTube's own thumbnail is used automatically.
-- **Instagram** links open the Reel in the Instagram app/site. Instagram doesn't share thumbnails, so **take a screenshot of the Reel**, crop it, and save it as the card's thumbnail file in `public/images/videos/`.
+- **Instagram Reels also play right on the website**, in Instagram's own player (the video streams from Instagram — nothing is downloaded or stored on your site). Paste the link exactly as Instagram gives it; the extra `?utm_source=…` part is ignored. Instagram doesn't share cover pictures, so set the card's `thumbnail` to any photo already on the site (for example `"/images/projects/project-02/cover.jpg"`), or save a screenshot of the Reel in `public/images/videos/`.
+- The reel must be from a **public** account for the player to work. **Reels with licensed music** (you'll see "Mix: …" or a song name at the top) **won't play outside Instagram** — Instagram shows only a "Watch on Instagram" button. For those, use YouTube or Google Drive instead (below).
+- **Google Drive videos also play on the page** (nothing is stored on your site): upload the video file to Google Drive → right-click → **Share** → *General access*: **Anyone with the link** → **Copy link**, and paste that link as the `url`. Keep `platform: "instagram"` if you want the card to still say "Instagram Reels". New uploads can take a few minutes before Drive can play them.
+- `featured: true` on a video makes it the large one on the home page and Videos page (put it on one video only).
 - Cards with an empty `url` show **"Coming soon"** — they never pretend to play.
 
 For **testimonials** use YouTube (you can upload them as *Unlisted* so they don't appear on your channel). Also fill in the client's name/label, and their exact quote only if you have it:
@@ -250,29 +253,15 @@ It lists the latest enquiries in the terminal and creates **`data/enquiries.csv`
 
 The `data` folder stays on your computer only — it's never uploaded or published.
 
-### On the live website — receive them in a Google Sheet (recommended, free)
+### Receive them in a Google Sheet (recommended, free)
 
-This works on every host, including Vercel, and lets you read enquiries on your phone.
+Works on your computer **and** the live site (Vercel, Hostinger, a VPS), and lets you read enquiries on your phone — each one arrives as a row with a tap-to-chat WhatsApp link and a Status column for follow-up.
 
-1. Create a new **Google Sheet**, name it e.g. *Build Smart Enquiries*.
-2. Menu **Extensions → Apps Script**. Delete what's there and paste the script from `docs/DEPLOYMENT.md` (section *Storing leads in Google Sheets*). On the first line, replace `PASTE_THE_SAME_VALUE_AS_LEAD_WEBHOOK_SECRET` with a long random password you make up, e.g. `bs-7Kq2-xP9w-31Lm`.
-3. Click **Deploy → New deployment → Select type: Web app**. *Execute as:* **Me**. *Who has access:* **Anyone**. Click **Deploy**, allow the permissions, and **copy the Web app URL**.
-4. In your hosting settings (Vercel → Project → Settings → Environment Variables) add:
-
-   | Name | Value |
-   | --- | --- |
-   | `LEAD_STORAGE` | `webhook` |
-   | `LEAD_WEBHOOK_URL` | the Web app URL you copied |
-   | `LEAD_WEBHOOK_SECRET` | the same password as in the script |
-
-5. Redeploy the site, submit a test enquiry from your phone, and check that a new row appears in the **Leads** tab.
-6. **Get an email for every new enquiry:** in the Google Sheet, **Tools → Notification settings** → choose *"Any changes are made"* and *"Email – right away"*.
-
-Install the **Google Sheets app** on your phone to see enquiries anywhere.
+Follow **`docs/GOOGLE-SHEETS-SETUP.md`** — about 10 minutes, once. The script to paste is ready in `docs/google-sheets/BuildSmart-Enquiries.gs` with its secret filled in; you then create `.env.local` with two lines (the web-app link and that secret) and check it with `npm run test-sheet`.
 
 ### If you host on your own server (VPS)
 
-Keep `LEAD_STORAGE=file`; enquiries are written to `data/leads.jsonl` on the server. Back it up regularly. (The Google Sheet option also works on a VPS.)
+The Google Sheet works on a VPS too. Without it (empty `LEAD_WEBHOOK_URL`), enquiries are written to `data/leads.jsonl` on the server — back it up regularly.
 
 ### WhatsApp alerts for each enquiry (Phase 2)
 

@@ -105,6 +105,12 @@ export const site = {
   },
 
   copyrightYear: new Date().getFullYear(),
+
+  /** Website credit in the footer. Add GenNV's website address to `url` to make the name a link. */
+  credit: {
+    name: "GenNV",
+    url: "",
+  },
 } as const;
 
 export const navigation = [

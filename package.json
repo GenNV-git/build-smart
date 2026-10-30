@@ -11,7 +11,8 @@
     "start": "next start",
     "photos": "node scripts/optimize-photos.mjs",
     "typecheck": "tsc --noEmit",
-    "leads": "node scripts/export-leads.mjs"
+    "leads": "node scripts/export-leads.mjs",
+    "test-sheet": "node scripts/test-sheet.mjs"
   },
   "engines": {
     "node": ">=20.9.0"

@@ -2,11 +2,10 @@
 
 import Image from "@/components/ui/Image";
 import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
 import type { Video } from "@/content/types";
 import { InstagramIcon, PlayIcon, YouTubeIcon } from "@/components/ui/Icons";
 import { TempImageTag } from "@/components/ui/DevNote";
-import { isInstagramUrl, youtubeId, youtubeThumb } from "@/lib/youtube";
+import { driveEmbed, instagramEmbed, isInstagramUrl, youtubeId, youtubeThumb } from "@/lib/youtube";
 import { VideoLightbox } from "./VideoLightbox";
 
 const platformLabel = { youtube: "YouTube Shorts", instagram: "Instagram Reels" } as const;
@@ -14,7 +13,7 @@ const platformLabel = { youtube: "YouTube Shorts", instagram: "Instagram Reels" 
 /**
  * Creator video card.
  *  - YouTube URL  → plays in a lightbox (player loads on click only)
- *  - Instagram URL → opens the original Reel in a new tab
+ *  - Instagram Reel/post URL → plays in Instagram's own embed player (streams from Instagram)
  *  - empty URL    → "Coming soon" (never shown as playable)
  */
 export function VideoCard({
@@ -31,12 +30,15 @@ export function VideoCard({
   const [playing, setPlaying] = useState(false);
   // The link decides how it plays, so a mismatched `platform` value can't break a card.
   const yt = youtubeId(video.url);
-  const ig = !yt && isInstagramUrl(video.url) ? video.url : null;
-  const platform = yt ? "youtube" : ig ? "instagram" : video.platform;
-  const live = !!(yt || ig);
+  const drive = !yt ? driveEmbed(video.url) : null;
+  const ig = !yt && !drive ? instagramEmbed(video.url) : null;
+  const igProfile = !yt && !drive && !ig && isInstagramUrl(video.url) ? video.url : null; // e.g. a profile link — opens Instagram
+  const platform = yt ? "youtube" : ig || igProfile ? "instagram" : video.platform;
+  const live = !!(yt || drive || ig || igProfile);
   const thumb = video.thumbnail?.src || (yt ? youtubeThumb(yt) : "");
   const featured = size === "featured";
-  const label = platform === "youtube" && video.orientation === "landscape" ? "YouTube" : platformLabel[platform];
+  // A video kept on Google Drive still shows its Instagram/YouTube label (set `platform` in videos.ts).
+  const label = platform === "youtube" && video.orientation === "landscape" ? "YouTube" : platform === "instagram" && video.orientation === "landscape" ? "Instagram" : platformLabel[platform];
   const PlatformIcon = platform === "youtube" ? YouTubeIcon : InstagramIcon;
 
   const body = (
@@ -48,6 +50,7 @@ export function VideoCard({
           fill
           sizes={featured ? "(min-width: 1024px) 45vw, 100vw" : sizes}
           className={`object-cover transition-transform duration-[1.1s] ease-[var(--ease-lux)] group-hover:scale-[1.05] ${live ? "" : "saturate-[0.7]"}`}
+          style={{ objectPosition: video.thumbnail?.position || "50% 50%" }}
         />
       ) : (
         <div className="absolute inset-0 bg-chocolate" />
@@ -85,7 +88,6 @@ export function VideoCard({
           <span className={`block font-semibold leading-tight text-cream ${featured ? "text-lg" : "text-[0.9rem]"}`}>{video.title}</span>
           <span className="mt-1 block text-xs text-cream/70">{video.subtitle}</span>
         </span>
-        {ig && <ArrowUpRight className="size-4 shrink-0 text-cream/80" aria-hidden="true" />}
       </span>
     </>
   );
@@ -94,21 +96,28 @@ export function VideoCard({
     featured ? "aspect-[4/3] sm:aspect-[16/10]" : "aspect-[3/4]"
   } ${className}`;
 
-  if (yt)
+  if (yt || drive || ig)
     return (
       <>
-        <button type="button" className={shape} onClick={() => setPlaying(true)} aria-label={`Play video: ${video.title}`}>
+        <button type="button" className={shape} onClick={() => setPlaying(true)} aria-label={`Play video: ${video.title}`} aria-haspopup="dialog">
           {body}
         </button>
         {playing && (
-          <VideoLightbox youtubeId={yt} title={video.title} orientation={video.orientation} onClose={() => setPlaying(false)} />
+          <VideoLightbox
+            youtubeId={yt ?? undefined}
+            drive={drive ?? undefined}
+            instagram={ig ?? undefined}
+            title={video.title}
+            orientation={video.orientation}
+            onClose={() => setPlaying(false)}
+          />
         )}
       </>
     );
 
-  if (ig)
+  if (igProfile)
     return (
-      <a href={ig} target="_blank" rel="noopener noreferrer" className={shape} aria-label={`Watch on Instagram: ${video.title} (opens in a new tab)`}>
+      <a href={igProfile} target="_blank" rel="noopener noreferrer" className={shape} aria-label={`Watch on Instagram: ${video.title} (opens in a new tab)`}>
         {body}
       </a>
     );

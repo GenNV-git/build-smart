@@ -62,8 +62,7 @@ export const founder = {
  *   frame:    "rounded" (curved corners) · "square" · "circle" · "arch" · "auto"
  *   position: which part stays visible when cropped, e.g. "50% 50%" (centre, default) or "50% 20%" (towards the top)
  *
- * Milestones marked `placeholder: true` still need Sanjay's real details:
- * period (year), company / stage, role and a short story.
+ * Optional: add years in `period` (e.g. "2018 – 2021"); left empty, the chip shows "Chapter 01", "Chapter 02" …
  */
 export const journeyPhotoDetails: Record<string, JourneyPhotoDetails> = {
   "milestone-01.jpg": { alt: "Sanjay on his graduation day, holding his degree certificate", frame: "arch" },
@@ -84,29 +83,29 @@ export const milestones: Milestone[] = [
   {
     id: "m1",
     period: "",
-    title: "Career Milestone 01",
-    organisation: "Where it began",
-    role: "Role & responsibilities to be added",
-    story: "The first chapter of Sanjay's journey in construction — the details will be shared here soon.",
-    placeholder: true,
+    title: "Engineered from the Ground Up",
+    organisation: "Bachelor's Degree · Civil Engineering",
+    role: "Civil Engineering Graduate",
+    story:
+      "Sanjay's journey began with a Bachelor's degree in Civil Engineering — a grounding in structural design, materials and construction methods that still guides every decision he makes on site.",
   },
   {
     id: "m2",
     period: "",
-    title: "Career Milestone 02",
-    organisation: "Learning on site",
-    role: "Role & responsibilities to be added",
-    story: "Years of site experience and the lessons that shaped how Build Smart works today — details coming soon.",
-    placeholder: true,
+    title: "Mastering the Site",
+    organisation: "Construction & Site Execution",
+    role: "Hands-on Site Experience",
+    story:
+      "From foundations and reinforcement to concreting and finishing, he learnt construction where it matters most — on site — building a deep, practical understanding of quality, sequence and workmanship.",
   },
   {
     id: "m3",
     period: "",
-    title: "Career Milestone 03",
-    organisation: "Growing expertise",
-    role: "Role & responsibilities to be added",
-    story: "Taking on greater responsibility across projects — details coming soon.",
-    placeholder: true,
+    title: "Building a Digital Edge",
+    organisation: "Digital Marketing & Brand Strategy",
+    role: "Digital Strategy",
+    story:
+      "Recognising how homeowners now discover and choose their builders, Sanjay trained in digital marketing — adding brand building, content strategy and online communication to his engineering expertise.",
   },
   {
     id: "m4",
@@ -115,23 +114,24 @@ export const milestones: Milestone[] = [
     organisation: "Build Smart",
     role: "Founder",
     story:
-      "Sanjay founded Build Smart to bring construction, interiors and clear communication together under one accountable team.",
+      "With wide experience across construction and interiors, Sanjay founded Build Smart — bringing design, construction, interiors and digital solutions together under one accountable team.",
   },
   {
     id: "m5",
     period: "",
-    title: "First Homes Delivered",
+    title: "Homes Built on Trust",
     organisation: "Build Smart",
-    role: "Founder & project lead",
-    story: "The first residential projects completed and handed over to their families — the beginning of the portfolio.",
+    role: "Founder & Project Lead",
+    story:
+      "Every home is delivered with a personal handover and the family's confidence. Transparent communication, careful execution and lasting relationships have become the hallmark of Build Smart.",
   },
   {
     id: "m6",
     period: "Today",
     title: "Sharing the Craft",
     organisation: "Instagram & YouTube",
-    role: "Creator",
+    role: "Creator & Industry Voice",
     story:
-      "Through Reels and Shorts, Sanjay takes people on site — showing progress, decisions and handovers as they really happen.",
+      "Today Sanjay shares his experience with a growing community online — real site progress, practical construction insights and finished spaces, helping homeowners build with clarity and confidence.",
   },
 ];

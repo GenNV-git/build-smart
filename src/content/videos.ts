@@ -7,8 +7,10 @@ import type { Video, VideoCategory } from "./types";
  *   YouTube:   https://www.youtube.com/shorts/<id>  or  https://youtu.be/<id>
  *   Instagram: https://www.instagram.com/reel/<code>/
  *
- * YouTube videos play inside the site (the player loads only on click).
- * Instagram Reels open on Instagram — save a thumbnail into /public/images/videos/.
+ * Both YouTube and Instagram videos play inside the site, in the official players
+ * (loaded only when the visitor presses play — nothing is downloaded or stored here).
+ * Instagram doesn't share cover pictures, so give each Reel a `thumbnail` (any photo on the site works).
+ * `featured: true` makes a video the large one on the home and Videos pages.
  *
  * A video with an empty `url` is shown as "Coming soon" and is never presented as playable.
  * The slots below mirror the content mix in the brief — retitle or remove as needed.
@@ -23,7 +25,6 @@ export const videos: Video[] = [
     url: "",
     thumbnail: { src: "/images/videos/team.jpg", alt: "", temporary: true },
     orientation: "landscape",
-    featured: true,
   },
   {
     id: "handover",
@@ -31,9 +32,11 @@ export const videos: Video[] = [
     subtitle: "Keys to a finished home",
     category: "handover",
     platform: "instagram",
-    url: "",
-    thumbnail: { src: "/images/videos/handover.jpg", alt: "", temporary: true },
+    url: "https://www.instagram.com/reel/DcqmCEIT5jm/",
+    // Cover picture for the card (re-uses the handover photo already on the site — no extra files).
+    thumbnail: { src: "/images/projects/project-02/cover.jpg", alt: "Handing over the completed home to the family", position: "50% 30%", temporary: false },
     orientation: "portrait",
+    featured: true,
   },
   {
     id: "site-visit",

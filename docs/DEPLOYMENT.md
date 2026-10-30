@@ -6,7 +6,7 @@ Before any deployment:
 
 1. Replace the temporary images and fill in the content (see `CONTENT-CHECKLIST.md`).
 2. Run `npm run build` locally — it must finish without errors.
-3. Decide where enquiries are stored (`LEAD_STORAGE`). On serverless hosts you **must** use `webhook`.
+3. Connect the Google Sheet for enquiries (`docs/GOOGLE-SHEETS-SETUP.md`). On serverless hosts (Vercel) this is **required** — the server can't keep files.
 
 ---
 
@@ -20,14 +20,13 @@ Before any deployment:
    | --- | --- |
    | `NEXT_PUBLIC_SITE_URL` | `https://www.your-domain.com` |
    | `NEXT_PUBLIC_WHATSAPP_NUMBER` | business number, digits only, e.g. `9198XXXXXXXX` |
-   | `LEAD_STORAGE` | `webhook` |
-   | `LEAD_WEBHOOK_URL` | your Google Apps Script / Make / Zapier URL (see below) |
-   | `LEAD_WEBHOOK_SECRET` | a long random string |
+   | `LEAD_WEBHOOK_URL` | your Google Apps Script web-app URL (see `GOOGLE-SHEETS-SETUP.md`) |
+   | `LEAD_WEBHOOK_SECRET` | the same value as in your `.env.local` / the Apps Script |
 
 4. Deploy, then add your domain under **Settings → Domains** and update the DNS records Vercel shows.
 5. Redeploy after changing any `NEXT_PUBLIC_…` variable (they are baked in at build time).
 
-> Why not `LEAD_STORAGE=file` on Vercel? Serverless file systems are temporary — enquiries would be lost.
+> Why not the file storage on Vercel? Serverless file systems are temporary — enquiries would be lost.
 
 ---
 
@@ -37,7 +36,7 @@ Before any deployment:
 # on the server
 git clone <your-repo> build-smart && cd build-smart
 npm ci
-cp .env.example .env.local   # edit: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_WHATSAPP_NUMBER, LEAD_STORAGE=file
+cp .env.example .env.local   # edit: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_WHATSAPP_NUMBER, LEAD_WEBHOOK_URL, LEAD_WEBHOOK_SECRET
 npm run build
 npm install -g pm2
 pm2 start npm --name build-smart -- start
@@ -58,7 +57,7 @@ server {
 }
 ```
 
-With `LEAD_STORAGE=file`, enquiries are appended to `data/leads.jsonl` (readable only by the server user). Back this file up regularly. To view: `cat data/leads.jsonl`, or open it in any JSON-lines viewer.
+Without a Google Sheet (empty `LEAD_WEBHOOK_URL`), enquiries are appended to `data/leads.jsonl` (readable only by the server user). Back this file up regularly. To view: `cat data/leads.jsonl`, or open it in any JSON-lines viewer.
 
 To update the site later: `git pull && npm ci && npm run build && pm2 restart build-smart`.
 
@@ -66,38 +65,9 @@ To update the site later: `git pull && npm ci && npm run build && pm2 restart bu
 
 ## Storing leads in Google Sheets (free, works with any host)
 
-1. Create a Google Sheet. **Extensions → Apps Script**, replace the code with:
+Step-by-step guide: **`docs/GOOGLE-SHEETS-SETUP.md`**. The Apps Script is in `docs/google-sheets/BuildSmart-Enquiries.gs`. Once deployed, set `LEAD_WEBHOOK_URL` and `LEAD_WEBHOOK_SECRET` (the storage switches to the sheet automatically) and check with `npm run test-sheet`.
 
-```js
-const SECRET = "PASTE_THE_SAME_VALUE_AS_LEAD_WEBHOOK_SECRET";
-
-function doPost(e) {
-  const body = JSON.parse(e.postData.contents || "{}");
-  if (body.secret !== SECRET || !body.lead) {
-    return json({ ok: false });
-  }
-  const l = body.lead;
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName("Leads") || ss.insertSheet("Leads");
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["Received", "Name", "Phone", "Project type", "Location", "Budget", "Preferred time", "Message", "Source", "ID"]);
-  }
-  // Prefix values that could be read as spreadsheet formulas.
-  const safe = (v) => (v == null ? "" : /^[=+\-@]/.test(String(v)) ? "'" + v : String(v));
-  sheet.appendRow([l.createdAt, l.name, l.phone, l.projectType, l.location, l.budget, l.contactTime, l.message, l.source, l.id].map(safe));
-  return json({ ok: true });
-}
-
-function json(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-}
-```
-
-2. **Deploy → New deployment → Web app**. Execute as: *Me*. Who has access: *Anyone*. Copy the web-app URL.
-3. Set `LEAD_STORAGE=webhook`, `LEAD_WEBHOOK_URL=<that URL>`, `LEAD_WEBHOOK_SECRET=<same secret>`.
-4. Submit a test enquiry on the live site and confirm the row appears. Share the sheet only with people who need it.
-
-Make, Zapier or n8n work the same way: create a "Custom webhook" trigger, paste its URL into `LEAD_WEBHOOK_URL`, and check the `secret` field (also sent as the `X-Build-Smart-Secret` header).
+Make, Zapier or n8n work the same way: create a "Custom webhook" trigger, paste its URL into `LEAD_WEBHOOK_URL`, and check the `secret` field (also sent as the `X-Build-Smart-Secret` header). If the receiver replies with JSON `{"ok": false}`, the website treats the enquiry as not saved and asks the visitor to try again.
 
 ---
 

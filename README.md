@@ -86,15 +86,15 @@ The form appears in the home hero, on `/contact`, and in an accessible modal ope
 
 **Flow:** browser validation → `POST /api/leads` → server validation (Zod, same rules) → spam checks (honeypot field, same-origin check, rate limit) → **store** → optional **WhatsApp notification** → success message.
 
-Storage is chosen with `LEAD_STORAGE`:
+Storage is automatic — the Google Sheet when `LEAD_WEBHOOK_URL` is set, otherwise a file — or forced with `LEAD_STORAGE`:
 
 | Value | Where leads go | Use for |
 | --- | --- | --- |
-| `file` (default) | `data/leads.jsonl` on the server (one JSON object per line, file mode 600, git-ignored) | Local development, a VPS |
+| `file` (when no webhook URL) | `data/leads.jsonl` on the server (one JSON object per line, file mode 600, git-ignored) | Local development, a VPS |
 | `webhook` | `LEAD_WEBHOOK_URL` (Google Sheets via Apps Script, Make, Zapier, n8n, a CRM) | **Vercel / Netlify / any serverless host** |
 | `mock` | Nowhere — the visitor sees success but nothing is saved | Demos / UI testing only |
 
-A ready-to-use Google Sheets receiver is in `docs/DEPLOYMENT.md`.
+A ready-to-use Google Sheets receiver: `docs/GOOGLE-SHEETS-SETUP.md` (script in `docs/google-sheets/`, check with `npm run test-sheet`).
 
 Form data is never put in URLs, never logged to the browser console, and never stored in browser storage. Server logs only record lead IDs and errors, not customer details.
 

@@ -16,7 +16,7 @@ Nothing on the site invents business facts. Everything below is either hidden, s
 - [ ] Professional background paragraph → `founder.background`
 - [ ] Review the intro, approach, values and vision wording with Sanjay
 - [ ] "Watch My Story" YouTube URL (button appears automatically) → `founder.storyVideoUrl`
-- [ ] **Career timeline**: replace "Career Milestone 01–03" with real stages — period/year, company or stage, role and a short story. Add years to milestones 04–05.
+- [x] Career timeline written (6 chapters). Optional: add years to each chapter's `period`, and review the wording with Sanjay
 - [x] Timeline photos added (chapters 1–6). Add more any time as `milestone-0N-x.jpg` — see `docs/HOW-TO-UPDATE.md`
 
 ## Projects — `src/content/projects.ts`

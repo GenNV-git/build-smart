@@ -49,7 +49,7 @@ export type ProjectGalleryItem = ImageAsset & { room?: string };
 
 export type Project = {
   slug: string;
-  /** Short label shown on cards, e.g. "Project 01". */
+  /** Internal reference only (not shown on the site). */
   label: string;
   /** Real project name. Leave as a neutral name until the client approves one. */
   name: string;

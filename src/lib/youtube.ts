@@ -33,3 +33,43 @@ export function isInstagramUrl(url?: string | null): boolean {
     return false;
   }
 }
+
+/**
+ * Instagram's official embed player for a Reel / post link, e.g.
+ * https://www.instagram.com/reel/DcqmCEIT5jm/?utm_source=… → https://www.instagram.com/reel/DcqmCEIT5jm/embed/
+ * The video streams from Instagram — nothing is downloaded or stored on this website.
+ */
+export function instagramEmbed(url?: string | null): { embedUrl: string; postUrl: string } | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url.trim());
+    if (!/(^|\.)instagram\.com$/.test(u.hostname)) return null;
+    const m = u.pathname.match(/^\/(?:[A-Za-z0-9_.]+\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]{5,40})\/?/);
+    if (!m) return null;
+    const kind = m[1] === "reels" ? "reel" : m[1];
+    return {
+      embedUrl: `https://www.instagram.com/${kind}/${m[2]}/embed/`,
+      postUrl: `https://www.instagram.com/${kind}/${m[2]}/`,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Google Drive video ("Anyone with the link can view") → Drive's own player, e.g.
+ * https://drive.google.com/file/d/1AbC…/view?usp=sharing → https://drive.google.com/file/d/1AbC…/preview
+ * The video streams from Google Drive — nothing is stored on this website.
+ */
+export function driveEmbed(url?: string | null): { embedUrl: string; viewUrl: string } | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url.trim());
+    if (u.hostname !== "drive.google.com") return null;
+    const id = u.pathname.match(/\/file\/d\/([A-Za-z0-9_-]{10,})/)?.[1] ?? u.searchParams.get("id");
+    if (!id || !/^[A-Za-z0-9_-]{10,}$/.test(id)) return null;
+    return { embedUrl: `https://drive.google.com/file/d/${id}/preview`, viewUrl: `https://drive.google.com/file/d/${id}/view` };
+  } catch {
+    return null;
+  }
+}

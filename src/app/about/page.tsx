@@ -107,7 +107,7 @@ export default function AboutPage() {
       </section>
 
       {/* Journey */}
-      <section id="journey" aria-labelledby="journey-title" className="py-16 sm:py-24 lg:py-32">
+      <section id="journey" aria-labelledby="journey-title" className="overflow-x-clip py-16 sm:py-24 lg:py-32">
         <div className="container-lux">
           <SectionHeading
             id="journey-title"
@@ -156,7 +156,7 @@ export default function AboutPage() {
           <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
             {gallery.map((v, i) => (
               <div key={v.id} data-reveal style={{ ["--reveal-delay" as string]: `${i * 70}ms` }}>
-                <VideoCard video={{ ...v, orientation: "portrait" }} />
+                <VideoCard video={v} />
               </div>
             ))}
           </div>

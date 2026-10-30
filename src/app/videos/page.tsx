@@ -44,7 +44,7 @@ export default function VideosPage() {
       <section aria-labelledby="featured-video-title" className="py-14 sm:py-20 lg:py-24">
         <div className="container-lux grid items-center gap-10 lg:grid-cols-[1.3fr_0.7fr] lg:gap-16">
           <div data-reveal>
-            <VideoCard video={{ ...featuredVideo, orientation: "landscape" }} size="featured" />
+            <VideoCard video={featuredVideo} size="featured" />
           </div>
           <div data-reveal>
             <p className="eyebrow">Featured</p>

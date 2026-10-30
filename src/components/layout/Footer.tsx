@@ -84,7 +84,21 @@ export function Footer() {
 
       <div className="border-t border-cream/10">
         <div className="container-lux flex flex-col gap-3 pb-28 pt-6 text-xs sm:pb-6 sm:pr-24 text-cream/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {site.copyrightYear} {site.legalName}. All rights reserved.</p>
+          <div className="space-y-1.5">
+            <p>© {site.copyrightYear} {site.legalName}. All rights reserved.</p>
+            {isSet(site.credit.name) && (
+              <p className="text-cream/45">
+                Designed &amp; developed by{" "}
+                {isSet(site.credit.url) ? (
+                  <a href={site.credit.url} target="_blank" rel="noopener" className="font-semibold text-gold-soft/90 transition-colors hover:text-gold">
+                    {site.credit.name}
+                  </a>
+                ) : (
+                  <span className="font-semibold text-gold-soft/90">{site.credit.name}</span>
+                )}
+              </p>
+            )}
+          </div>
           <ul className="flex flex-wrap gap-x-5 gap-y-2">
             <li><Link href="/privacy-policy" className="hover:text-gold">Privacy Policy</Link></li>
             <li><Link href="/terms" className="hover:text-gold">Terms &amp; Conditions</Link></li>

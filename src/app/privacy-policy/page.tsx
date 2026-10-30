@@ -54,8 +54,9 @@ export default function PrivacyPage() {
       </p>
       <h2>Embedded videos</h2>
       <p>
-        Videos on this site are hosted by YouTube or Instagram. YouTube players use the privacy-enhanced mode and load only when you press
-        play; links to Instagram open on Instagram. Those services have their own privacy policies.
+        Videos on this site are hosted by YouTube and Instagram and play in their official players. A player is loaded only when you
+        press play (YouTube uses its privacy-enhanced mode). Once loaded, those services may set their own cookies and collect data under
+        their own privacy policies.
       </p>
       <h2>Changes</h2>
       <p>We may update this policy from time to time. The &ldquo;last updated&rdquo; date above shows the latest version.</p>

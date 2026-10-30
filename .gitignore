@@ -12,3 +12,6 @@ next-env.d.ts
 
 # Full-size originals of photos that were compressed for the web (kept on your computer, not deployed)
 /photo-originals/
+
+# Google Sheets Apps Script with your secret filled in — stays on your computer
+/docs/google-sheets/*.gs

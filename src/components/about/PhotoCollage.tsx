@@ -39,6 +39,7 @@ function Tile({
   className = "",
   extra = 0,
   lifted = false,
+  index = 0,
 }: {
   photo: JourneyPhoto;
   frame: Frame;
@@ -47,13 +48,14 @@ function Tile({
   className?: string;
   extra?: number;
   lifted?: boolean;
+  index?: number;
 }) {
   return (
     <button
       type="button"
       onClick={onOpen}
-      style={{ aspectRatio: aspectFor(frame, ratioOf(photo)) }}
-      className={`group relative block overflow-hidden bg-chocolate/80 shadow-[var(--shadow-soft)] transition-shadow duration-500 hover:shadow-[var(--shadow-lift)] focus-visible:outline-offset-4 ${shapeClass[frame]} ${
+      style={{ aspectRatio: aspectFor(frame, ratioOf(photo)), ["--i" as string]: index }}
+      className={`journey-pop group relative block overflow-hidden bg-chocolate/80 shadow-[var(--shadow-soft)] transition-shadow duration-500 hover:shadow-[var(--shadow-lift)] focus-visible:outline-offset-4 ${shapeClass[frame]} ${
         lifted ? "ring-[4px] ring-cream sm:ring-[6px]" : ""
       } ${className}`}
       aria-label={extra ? `View all photos (${extra} more): ${photo.alt}` : `View photo: ${photo.alt}`}
@@ -115,6 +117,7 @@ export function PhotoCollage({
       className={`${frames[i] === "circle" ? "mx-auto w-[88%]" : "w-full"} ${opts.className ?? ""}`}
       lifted={opts.lifted}
       extra={i === shown.length - 1 ? hidden : 0}
+      index={i}
     />
   );
 

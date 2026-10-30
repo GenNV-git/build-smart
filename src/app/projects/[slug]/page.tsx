@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { slug } = await params;
   const p = getProject(slug);
   if (!p) return {};
-  const title = `${p.label}: ${p.name}`;
+  const title = p.location ? `${p.name}, ${p.location}` : p.name;
   return {
     title,
     description: p.summary,
@@ -59,7 +59,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
           <Link href="/projects" className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-cream/75 hover:text-gold">
             <ArrowLeft className="size-4" /> All projects
           </Link>
-          <p className="eyebrow eyebrow-light mt-8 flex w-fit">{project.label}</p>
+          <p className="eyebrow eyebrow-light mt-8 flex w-fit">Our Work</p>
           <h1 id="project-title" className="mt-4 text-5xl leading-none sm:text-7xl">
             {project.name}
           </h1>
@@ -185,7 +185,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
                   size="featured"
                   video={{
                     id: `${project.slug}-walkthrough`,
-                    title: `${project.label} walkthrough`,
+                    title: `${project.name} walkthrough`,
                     subtitle: project.name,
                     category: "progress",
                     platform: "youtube",

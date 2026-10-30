@@ -10,7 +10,7 @@ export function ProjectCard({ project, priority = false, tall = false }: { proje
     <Link
       href={`/projects/${project.slug}`}
       className={`group relative block overflow-hidden rounded-[1.4rem] bg-chocolate shadow-[var(--shadow-soft)] ${tall ? "aspect-[4/5] sm:aspect-[4/3] lg:aspect-[5/4]" : "aspect-[4/5] min-[480px]:aspect-[4/3] lg:aspect-[5/4]"}`}
-      aria-label={`Explore ${project.label}: ${project.name}`}
+      aria-label={`Explore project: ${project.name}${project.location ? `, ${project.location}` : ""}`}
     >
       <Image
         src={project.cover.src}
@@ -25,8 +25,7 @@ export function ProjectCard({ project, priority = false, tall = false }: { proje
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(25_22_19/0)_35%,rgb(25_22_19/0.85)_100%)] transition-opacity duration-500" />
       <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 sm:p-8">
         <div className="text-cream">
-          <p className="text-xs font-medium tracking-wide text-cream/70">{project.label}</p>
-          <h3 className="mt-1 font-sans text-lg font-bold sm:mt-1.5 sm:text-2xl">{project.name}</h3>
+          <h3 className="font-sans text-lg font-bold sm:text-2xl">{project.name}</h3>
           <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.8rem] text-cream/75">
             {isSet(project.location) && (
               <span className="inline-flex items-center gap-1.5">

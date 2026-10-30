@@ -16,7 +16,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
   const yt = youtubeId(t.videoUrl);
   const thumb = t.thumbnail?.src || (yt ? youtubeThumb(yt) : "");
   const project = t.projectSlug ? getProject(t.projectSlug) : undefined;
-  const title = `${t.clientLabel}${project ? ` — ${project.label}` : ""} testimonial`;
+  const title = `${t.clientLabel}${project ? ` — ${project.name}` : ""} testimonial`;
 
   const media = (
     <>
@@ -75,7 +75,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
           <p className="text-sm font-semibold text-espresso">{t.clientLabel}</p>
           {project && (
             <Link href={`/projects/${project.slug}`} className="text-xs text-muted underline-offset-2 hover:text-gold-deep hover:underline">
-              {project.type} · {project.label}
+              {project.name}{project.location ? ` · ${project.location}` : ""}
             </Link>
           )}
         </div>
