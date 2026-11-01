@@ -108,10 +108,10 @@ export const site = {
 
   copyrightYear: new Date().getFullYear(),
 
-  /** Website credit in the footer. Add GenNV's website address to `url` to make the name a link. */
+  /** Website credit in the footer ("Designed & developed by GenNV") — the name links to `url` (opens in a new tab). */
   credit: {
     name: "GenNV",
-    url: "",
+    url: "https://www.instagram.com/gennv.official/",
   },
 } as const;
 
