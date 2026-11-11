@@ -46,7 +46,7 @@ export async function storeLead(lead: LeadRecord): Promise<StorageResult> {
         ...(secret ? { "X-Build-Smart-Secret": secret } : {}),
       },
       // The secret is sent both as a header and in the body (Google Apps Script cannot read request headers).
-      body: JSON.stringify({ type: "website_enquiry", secret: secret || undefined, lead }),
+      body: JSON.stringify({ type: lead.incomplete ? "website_enquiry_incomplete" : "website_enquiry", secret: secret || undefined, lead }),
       redirect: "follow", // Google Apps Script answers through a redirect
       signal: AbortSignal.timeout(15_000),
       cache: "no-store",

@@ -12,6 +12,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: r === "" ? 1 : r.startsWith("/privacy") || r === "/terms" ? 0.3 : 0.8,
     })),
-    ...projects.map((p) => ({ url: `${site.url}/projects/${p.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 })),
+    ...projects.map((p) => ({
+      url: `${site.url}/projects/${p.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+      images: [`${site.url}${p.cover.src}`],
+    })),
   ];
 }

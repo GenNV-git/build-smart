@@ -9,19 +9,41 @@ import { ConsultButton } from "@/components/forms/ConsultButton";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { CtaBanner } from "@/components/layout/CtaBanner";
 import { images } from "@/content/images";
+import { site } from "@/content/site";
 import { publicImageSize } from "@/lib/image-size";
+import { breadcrumbLd, pageMeta, withArea } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
 
-export const metadata: Metadata = {
-  title: "Services",
-  description:
+export const metadata: Metadata = pageMeta({
+  title: "Home Construction, Interior Design & Turnkey Services",
+  description: withArea(
     "Home construction, interior design, turnkey project management and digital solutions — one accountable team from concept to handover.",
-  alternates: { canonical: "/services" },
-  openGraph: { title: "Services | Build Smart", url: "/services" },
-};
+  ),
+  path: "/services",
+});
 
 export default function ServicesPage() {
   return (
     <>
+      <JsonLd data={breadcrumbLd([{ name: "Services", path: "/services" }])} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Build Smart services",
+          itemListElement: services.map((sv, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            item: {
+              "@type": "Service",
+              name: sv.title,
+              description: sv.summary,
+              url: `${site.url}/services#${sv.slug}`,
+              provider: { "@id": `${site.url}/#business` },
+            },
+          })),
+        }}
+      />
       <PageHero
         eyebrow="Our Services"
         title="Complete Solutions"

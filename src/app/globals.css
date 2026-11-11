@@ -286,3 +286,108 @@ dialog.photo-dialog::backdrop { background: rgb(15 12 10 / 0.94); backdrop-filte
   html.js [data-reveal]:not(.is-visible) .journey-pop { opacity: 0; }
   html.js [data-reveal].is-visible .journey-pop { animation: journey-pop 0.75s var(--ease-lux) both; animation-delay: calc(var(--i, 0) * 120ms + 280ms); }
 }
+
+/* ------------------------------------------------------------------
+   Opening screen (Splash.tsx) — the Build Smart mark for about a second.
+   Pure CSS: it always lifts away, even if scripts fail.
+------------------------------------------------------------------- */
+:root { --splash-time: 1s; }
+.splash {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  background: radial-gradient(120% 85% at 50% 42%, #35241a 0%, #24170f 55%, #191613 100%);
+  animation: splash-out 0.5s var(--ease-lux) var(--splash-time) forwards;
+}
+.splash-inner { position: relative; display: flex; flex-direction: column; align-items: center; }
+.splash-logo { position: relative; width: 9.5rem; height: auto; animation: splash-logo 0.7s var(--ease-lux) both; }
+.splash-ring {
+  position: absolute; left: 50%; top: 3.3rem; width: min(15rem, 66vw); aspect-ratio: 1; translate: -50% -50%; border-radius: 999px;
+  border: 1px dashed rgb(214 177 109 / 0.28); animation: splash-ring 6s linear infinite, splash-fade 0.8s var(--ease-lux) both;
+}
+.splash-bar { margin-top: 1.5rem; width: 8.5rem; height: 2px; border-radius: 2px; overflow: hidden; background: rgb(214 177 109 / 0.18); }
+.splash-bar > span { display: block; height: 100%; transform-origin: left; background: linear-gradient(90deg, #94702f, #ecd5a4); animation: splash-fill var(--splash-time) cubic-bezier(0.4, 0, 0.2, 1) both; }
+.splash-tag { margin-top: 0.95rem; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: rgb(248 243 234 / 0.6); animation: splash-fade 0.7s var(--ease-lux) 0.2s both; }
+@keyframes splash-out { to { opacity: 0; visibility: hidden; } }
+@keyframes splash-logo { from { opacity: 0; transform: translateY(10px) scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes splash-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes splash-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splash-ring { to { transform: rotate(360deg); } }
+@media print { .splash { display: none; } }
+/* Hold the first on-page animations until the opening screen lifts, so they are seen rather than hidden behind it. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js.splash-on [data-reveal] { opacity: 0 !important; transform: translateY(22px) !important; transition: none !important; }
+}
+
+/* ------------------------------------------------------------------
+   Animated graphics (src/components/motion) — line art, rings, moving band.
+   All transform/opacity based so phones stay smooth; all stop for
+   visitors who ask for reduced motion.
+------------------------------------------------------------------- */
+
+/* Blueprint line art: each line draws in, one after another */
+.bp path { stroke-dasharray: 1; stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal="draw"] { opacity: 1; transform: none; }
+  html.js [data-reveal="draw"] path { stroke-dashoffset: 1; }
+  html.js [data-reveal="draw"].is-visible path { animation: bp-draw 1.5s var(--ease-lux) forwards; animation-delay: calc(var(--i, 0) * 130ms); }
+  html.js [data-reveal="draw"].is-visible .bp-float { animation: bp-float 9s ease-in-out 2.5s infinite; }
+}
+@keyframes bp-draw { to { stroke-dashoffset: 0; } }
+@keyframes bp-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+/* Orbit rings */
+.orbit-ring { position: absolute; border-radius: 999px; border: 1px dashed rgb(214 177 109 / 0.3); }
+.orbit-ring-1 { inset: 0; animation: orbit-spin 60s linear infinite; }
+.orbit-ring-2 { inset: 16%; border-style: solid; border-color: rgb(214 177 109 / 0.16); animation: orbit-spin 42s linear infinite reverse; }
+.orbit-ring-3 { inset: 32%; border-color: rgb(214 177 109 / 0.22); animation: orbit-spin 80s linear infinite; }
+.orbit-ring > i { position: absolute; left: 50%; top: -4px; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 999px; background: var(--color-gold); box-shadow: 0 0 12px 2px rgb(214 177 109 / 0.55); }
+.orbit-ring-2 > i { top: auto; bottom: -3px; width: 5px; height: 5px; margin-left: -2.5px; background: var(--color-gold-soft); }
+.orbit-cross { position: absolute; inset: 46%; background:
+  linear-gradient(rgb(214 177 109 / 0.5), rgb(214 177 109 / 0.5)) center / 100% 1px no-repeat,
+  linear-gradient(rgb(214 177 109 / 0.5), rgb(214 177 109 / 0.5)) center / 1px 100% no-repeat; }
+@keyframes orbit-spin { to { transform: rotate(360deg); } }
+
+/* Moving band of services */
+.marquee { overflow: hidden; border-block: 1px solid rgb(214 177 109 / 0.18); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee-track { display: flex; width: max-content; animation: marquee 38s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-row { display: flex; flex-shrink: 0; align-items: center; }
+.marquee-row li { display: flex; align-items: center; white-space: nowrap; font-family: var(--font-display); font-size: 1.7rem; line-height: 1; letter-spacing: 0.01em; }
+.marquee-row li.marquee-outline { color: transparent; -webkit-text-stroke: 1px var(--color-gold); }
+.marquee-star { width: 0.85rem; height: 0.85rem; margin-inline: 1.5rem; color: var(--color-gold); animation: orbit-spin 9s linear infinite; }
+@media (min-width: 640px) { .marquee-row li { font-size: 2.6rem; } .marquee-star { width: 1.1rem; height: 1.1rem; margin-inline: 2.25rem; } }
+@keyframes marquee { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+/* Lines that grow, icons that draw, nodes that light up — triggered by the same [data-reveal] system */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal].grow-x, html.js [data-reveal].grow-y { opacity: 1; transition: transform 1.8s var(--ease-lux) 0.25s; }
+  html.js [data-reveal].grow-x { transform: scaleX(0); transform-origin: left center; }
+  html.js [data-reveal].grow-y { transform: scaleY(0); transform-origin: center top; }
+  html.js [data-reveal].grow-x.is-visible, html.js [data-reveal].grow-y.is-visible { transform: none; }
+
+  html.js [data-reveal] .icon-draw svg * { stroke-dasharray: 100; stroke-dashoffset: 100; }
+  html.js [data-reveal].is-visible .icon-draw svg * { animation: icon-draw 1.5s var(--ease-lux) forwards; animation-delay: calc(var(--reveal-delay, 0ms) + var(--icon-delay, 0ms) + 250ms); }
+
+  html.js [data-reveal].is-visible .node-pop { animation: node-pop 0.9s var(--ease-lux) both; animation-delay: calc(var(--reveal-delay, 0ms) + 200ms); }
+  html.js [data-reveal].is-visible .node-pop::after { content: ""; position: absolute; inset: -1px; border-radius: 999px; border: 1.5px solid var(--color-gold); opacity: 0; animation: journey-ping 1.4s var(--ease-lux) 1; animation-delay: calc(var(--reveal-delay, 0ms) + 700ms); }
+
+  html.js [data-reveal] .eyebrow::before, html.js .eyebrow[data-reveal]::before { transform: scaleY(0); transition: transform 0.7s var(--ease-lux) 0.35s; }
+  html.js [data-reveal].is-visible .eyebrow::before, html.js .eyebrow[data-reveal].is-visible::before { transform: none; }
+}
+@keyframes icon-draw { to { stroke-dashoffset: 0; } }
+@keyframes node-pop { 0% { transform: scale(0.6); box-shadow: 0 0 0 0 rgb(214 177 109 / 0); } 55% { transform: scale(1.08); box-shadow: 0 0 0 8px rgb(214 177 109 / 0.18); } 100% { transform: none; box-shadow: 0 0 0 0 rgb(214 177 109 / 0); } }
+
+/* Soft light sweep across the offer badge and the main gold button */
+.offer-badge::after, .btn-shine::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%);
+  transform: translateX(-130%); animation: shine 5.5s var(--ease-lux) 1.6s infinite;
+}
+.btn-shine { position: relative; overflow: hidden; }
+@keyframes shine { 0% { transform: translateX(-130%); } 22%, 100% { transform: translateX(130%); } }
+
+/* Drifting specks of gold light for dark sections */
+.dust { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.dust > i { position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 999px; background: var(--color-gold-soft); opacity: 0; animation: dust-rise linear infinite; }
+@keyframes dust-rise { 0% { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; } 12% { opacity: 0.7; } 80% { opacity: 0.35; } 100% { transform: translate3d(var(--dx, 20px), -70vh, 0) scale(1.1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dust { display: none; } }

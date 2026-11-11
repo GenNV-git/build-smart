@@ -6,13 +6,16 @@ import { ConsultationForm } from "@/components/forms/ConsultationForm";
 import { WhatsAppIcon } from "@/components/ui/Icons";
 import { SocialLinks } from "@/components/layout/SocialLinks";
 import { images } from "@/content/images";
+import { breadcrumbLd, pageMeta, withArea } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Contact & Free Consultation",
-  description: "Tell us about your home, interior or turnkey project and book a free consultation with Build Smart.",
-  alternates: { canonical: "/contact" },
-  openGraph: { title: "Contact | Build Smart", url: "/contact" },
-};
+  description: withArea(
+    "Planning a new home, interiors or a turnkey project? Call, WhatsApp or send your details to Build Smart and book a free consultation.",
+  ),
+  path: "/contact",
+});
 
 const nextSteps = [
   { title: "We review your enquiry", text: "Your details go straight to the Build Smart team." },
@@ -32,6 +35,7 @@ export default function ContactPage() {
 
   return (
     <>
+      <JsonLd data={breadcrumbLd([{ name: "Contact", path: "/contact" }])} />
       <PageHero
         eyebrow="Contact"
         title="Let's Plan Your"

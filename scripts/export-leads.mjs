@@ -56,7 +56,7 @@ const phone = (v) => {
 };
 const raw = Symbol("raw");
 
-const header = ["Received (IST)", "Name", "Phone / WhatsApp", "Project type", "City / location", "Budget", "Best time to call", "Message", "Came from"];
+const header = ["Received (IST)", "Name", "Phone / WhatsApp", "Project type", "City / location", "Budget", "Best time to call", "Message", "Came from", "Status"];
 const rows = leads.map((l) => [
   ist(l.createdAt),
   l.name,
@@ -67,13 +67,14 @@ const rows = leads.map((l) => [
   l.contactTime,
   l.message,
   sourceNames[l.source] || l.source || "",
+  l.incomplete ? "Not submitted" : "Sent",
 ]);
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, "﻿" + [header, ...rows].map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n");
 
 console.log(`\n${leads.length} enquir${leads.length === 1 ? "y" : "ies"} — newest first:\n`);
 for (const l of leads.slice(0, 20)) {
-  console.log(`  ${ist(l.createdAt)}  ${l.name}  ${phone(l.phone).trim()}  ${l.projectType}  ${l.location}`);
+  console.log(`  ${ist(l.createdAt)}  ${l.name}  ${phone(l.phone).trim()}  ${l.projectType || "—"}  ${l.location || "—"}${l.incomplete ? "  (not submitted)" : ""}`);
 }
 if (leads.length > 20) console.log(`  … and ${leads.length - 20} more`);
 console.log(`\nSaved for Excel: ${path.relative(ROOT, OUT)}\n`);

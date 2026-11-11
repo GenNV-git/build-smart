@@ -13,6 +13,8 @@ import { BeforeAfter } from "@/components/video/BeforeAfter";
 import { DevNote, TempImageTag } from "@/components/ui/DevNote";
 import { CtaBanner } from "@/components/layout/CtaBanner";
 import { driveEmbed, instagramEmbed, youtubeId } from "@/lib/youtube";
+import { breadcrumbLd, pageMeta } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
 
 type Params = { slug: string };
 
@@ -27,12 +29,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const p = getProject(slug);
   if (!p) return {};
   const title = p.location ? `${p.name}, ${p.location}` : p.name;
-  return {
-    title,
+  return pageMeta({
+    title: p.type && !title.toLowerCase().includes(p.type.toLowerCase()) ? `${title} — ${p.type}` : `${title} Project`,
     description: p.summary,
-    alternates: { canonical: `/projects/${p.slug}` },
-    openGraph: { title: `${title} | Build Smart`, description: p.summary, url: `/projects/${p.slug}`, images: [{ url: p.cover.src }] },
-  };
+    path: `/projects/${p.slug}`,
+    image: p.cover.src,
+    imageAlt: p.cover.alt,
+  });
 }
 
 export default async function ProjectPage({ params }: { params: Promise<Params> }) {
@@ -58,6 +61,12 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbLd([
+          { name: "Projects", path: "/projects" },
+          { name: project.name, path: `/projects/${project.slug}` },
+        ])}
+      />
       {/* 1. Hero */}
       <section aria-labelledby="project-title" className="relative isolate flex min-h-[78svh] items-end overflow-hidden bg-espresso pb-16 pt-36 text-cream">
         <Image src={project.cover.src} alt={project.cover.alt} fill priority sizes="100vw" className="-z-20 object-cover" style={{ objectPosition: project.cover.position || "50% 50%" }} />

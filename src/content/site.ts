@@ -14,10 +14,28 @@ export const site = {
   shortDescription:
     "Build Smart designs and builds homes and interiors with care — from the first sketch to the final handover.",
   seoDescription:
-    "Build Smart — construction, interior design and turnkey residential projects led by founder Sanjay. Book a free consultation.",
+    "Build Smart builds homes and designs interiors — home construction, interior design and turnkey projects led by civil engineer Sanjay K. Book a free consultation.",
+  /** Search phrases this business should be found for. Add your city/area names here once the service area is confirmed. */
+  seoKeywords: [
+    "Build Smart",
+    "home construction",
+    "house construction company",
+    "interior design",
+    "interior designers",
+    "turnkey home projects",
+    "residential construction",
+    "home interiors",
+    "construction and interiors",
+  ],
 
-  /** Public site URL — set NEXT_PUBLIC_SITE_URL in the environment for production. */
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
+  /**
+   * Public address of the live site — used for Google (canonical links, sitemap) and sharing previews.
+   * NEXT_PUBLIC_SITE_URL in the hosting settings overrides it; a forgotten or placeholder value falls back to the real domain.
+   */
+  url: (/^https?:\/\/(?!.*your-domain\.com)/.test(process.env.NEXT_PUBLIC_SITE_URL || "")
+    ? (process.env.NEXT_PUBLIC_SITE_URL as string)
+    : "https://www.buildsmart.org.in"
+  ).replace(/\/$/, ""),
 
   founder: {
     name: "Sanjay", // used across the site ("About Sanjay")
@@ -63,11 +81,27 @@ export const site = {
   },
 
   /**
-   * Trust figures. Only real, verifiable numbers belong here.
-   * `completedProjects` reflects the brief ("approximately two residential projects") — confirm before launch.
+   * The offer shown beside "Free Consultation" buttons and on the quote pop-up.
+   * Change `value` to change the amount everywhere; set enabled: false to hide it.
+   * Only advertise a value the business genuinely stands behind.
    */
-  stats: {
-    completedProjects: "2+",
+  offer: {
+    enabled: true,
+    value: "₹5,000",
+    /** Short line used on badges. */
+    label: "Free consultation worth ₹5,000",
+    /** Longer line used under headings. */
+    line: "Book a personal project consultation worth ₹5,000 — free, with no obligation.",
+  },
+
+  /**
+   * Google Tag Manager. Paste your container ID (looks like "GTM-XXXXXXX") here, or set
+   * NEXT_PUBLIC_GTM_ID in the hosting settings. While empty, no tracking code is loaded at all.
+   */
+  analytics: {
+    gtmId: (process.env.NEXT_PUBLIC_GTM_ID || "").trim(),
+    /** Google Search Console "HTML tag" verification code (only the content="…" value). Optional. */
+    googleSiteVerification: (process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "").trim(),
   },
 
   /**
@@ -104,6 +138,13 @@ export const site = {
       "Not sure yet",
     ],
     contactTimes: ["Morning (9 am – 12 pm)", "Afternoon (12 – 4 pm)", "Evening (4 – 8 pm)", "Any time"],
+    /**
+     * Save "started but not sent" enquiries: when a visitor has typed a name and a valid phone number
+     * but leaves without pressing the button, those details go to the Google Sheet marked "Not submitted".
+     * If they send the form later, the same row is completed instead of adding a second one.
+     * Set to false to switch this off. (It is disclosed in the Privacy Policy.)
+     */
+    saveIncomplete: true,
   },
 
   copyrightYear: new Date().getFullYear(),

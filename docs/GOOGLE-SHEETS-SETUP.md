@@ -85,6 +85,37 @@ Install the **Google Sheets** app and open *Build Smart Enquiries*. You can also
 
 ---
 
+## "Not submitted" rows — forms that were filled in but not sent
+
+When a visitor types a **name and a valid phone number** and then leaves without pressing the button (closes the pop-up, switches tab, leaves the page, or pauses for 25 seconds), the details typed so far are saved as a row with:
+
+- **Status: Not submitted** and a **yellow** row,
+- **Sent from:** the form's name followed by *(not sent)*.
+
+What happens next is automatic:
+
+| Situation | Result in the sheet |
+| --- | --- |
+| They come back and send the form | The **same row** is completed, turns white, Status becomes **New** — never two rows |
+| They type again in another form (same phone number) | The same yellow row is updated |
+| They already sent a real enquiry | Nothing is added |
+| You change the Status yourself (e.g. to *Called*) | The yellow colour clears; later typing no longer changes the row |
+
+A name without a valid phone number is never saved.
+
+**To switch it on in an existing sheet** (needed once, because the script changed):
+
+1. Open the sheet → **Extensions → Apps Script**.
+2. Note what you have on the `NOTIFY_EMAIL` line, then replace **all** the code with the new `docs/google-sheets/BuildSmart-Enquiries.gs` and put your email address(es) back on the `NOTIFY_EMAIL` line.
+3. Save (**Ctrl + S**), then **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**. The link and the secret stay the same — nothing changes in Vercel.
+
+Options at the top of the script: `NOTIFY_INCOMPLETE = true` also emails you for each not-submitted form (set `false` to stop those emails).
+To switch the whole feature off on the website: `saveIncomplete: false` in `src/content/site.ts`.
+
+> **Use these details carefully.** These visitors did not press the button or tick the consent box. The Privacy Policy tells visitors that started forms may be saved and that you may contact them **once** to offer help, and that the record is deleted within 90 days — so call or message once, politely, and delete yellow rows that go nowhere.
+
+---
+
 ## Good to know
 
 - **Changing the script later?** After any edit: **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**. The link stays the same. (Saving alone doesn't update the live script.)

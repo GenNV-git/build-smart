@@ -8,7 +8,11 @@ Nothing on the site invents business facts. Everything below is either hidden, s
 - [ ] Studio address, working hours, service area → `site.contact`
 - [x] Instagram (@_build_smart_ and Sanjay's @buildwithsanjay), YouTube, Facebook, LinkedIn
 - [ ] Registered business name, if different → `site.legalName`
-- [ ] Confirm the completed-project count (`site.stats.completedProjects`, currently "2+")
+- [ ] **Service area** (city / region) → `site.contact.serviceArea` — the single most useful thing for Google searches like "interior designers in <city>"
+- [ ] Confirm the consultation offer ("worth ₹5,000") → `site.offer`
+- [ ] Google Tag Manager ID → `NEXT_PUBLIC_GTM_ID` in Vercel (see `docs/HOW-TO-UPDATE.md`)
+- [ ] Google Search Console: verify the site and submit `sitemap.xml`; create a Google Business Profile
+- [ ] Update the Apps Script in the Google Sheet to the new version (for "Not submitted" rows) — `docs/GOOGLE-SHEETS-SETUP.md`
 - [ ] Confirm the budget ranges offered in the form (`site.form.budgets`)
 - [ ] Live domain → `NEXT_PUBLIC_SITE_URL`
 

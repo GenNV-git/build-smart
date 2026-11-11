@@ -1,5 +1,6 @@
 import Image from "@/components/ui/Image";
 import { ConsultButton } from "@/components/forms/ConsultButton";
+import { OfferBadge } from "@/components/ui/OfferBadge";
 import { images } from "@/content/images";
 
 export function CtaBanner({
@@ -30,6 +31,7 @@ export function CtaBanner({
             {title}
           </h2>
           <p className="mt-4 text-cream/75">{text}</p>
+          <OfferBadge className="mt-6" />
         </div>
         <div className="w-full sm:w-auto" data-reveal style={{ ["--reveal-delay" as string]: "120ms" }}>
           <ConsultButton source={source} className="btn btn-gold w-full sm:w-auto" />

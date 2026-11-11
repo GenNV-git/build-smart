@@ -7,7 +7,7 @@ const hits = new Map<string, number[]>();
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX = Number(process.env.LEAD_RATE_LIMIT_PER_10_MIN || 5);
 
-export function rateLimited(key: string): boolean {
+export function rateLimited(key: string, max: number = MAX): boolean {
   const now = Date.now();
   const recent = (hits.get(key) || []).filter((t) => now - t < WINDOW_MS);
   recent.push(now);
@@ -15,5 +15,5 @@ export function rateLimited(key: string): boolean {
   if (hits.size > 5000) {
     for (const [k, v] of hits) if (v.every((t) => now - t > WINDOW_MS)) hits.delete(k);
   }
-  return recent.length > MAX;
+  return recent.length > max;
 }

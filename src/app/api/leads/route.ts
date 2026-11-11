@@ -4,7 +4,7 @@ import { leadSchema, fieldErrorsFrom } from "@/lib/lead-schema";
 import { storageStatus, storeLead } from "@/lib/leads/storage";
 import { notifyOwnerOnWhatsApp } from "@/lib/leads/whatsapp";
 import { rateLimited } from "@/lib/leads/rate-limit";
-import type { LeadRecord } from "@/lib/leads/types";
+import type { SubmittedLead } from "@/lib/leads/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { website: _hp, consent: _c, ...data } = parsed.data;
-  const lead: LeadRecord = { id: randomUUID(), createdAt: new Date().toISOString(), consentGiven: true, ...data };
+  const lead: SubmittedLead = { id: randomUUID(), createdAt: new Date().toISOString(), consentGiven: true, ...data };
 
   try {
     await storeLead(lead);

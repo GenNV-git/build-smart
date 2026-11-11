@@ -8,10 +8,11 @@ import { VideosSection } from "@/components/home/VideosSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { CtaBanner } from "@/components/layout/CtaBanner";
+import { ServiceMarquee } from "@/components/motion/ServiceMarquee";
+import { pageMeta, withArea } from "@/lib/seo";
+import { site } from "@/content/site";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-};
+export const metadata: Metadata = pageMeta({ title: "Home", description: withArea(site.seoDescription), path: "/" });
 
 export default function HomePage() {
   return (
@@ -19,6 +20,7 @@ export default function HomePage() {
       <Hero />
       <StatsBar />
       <AboutIntro />
+      <ServiceMarquee />
       <ServicesSection />
       <ProjectsSection />
       <VideosSection />

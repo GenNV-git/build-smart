@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { BadgeCheck, Clock3, X } from "lucide-react";
 import Image from "@/components/ui/Image";
 import { ConsultationForm } from "./ConsultationForm";
+import { track } from "@/lib/track";
 import { site } from "@/content/site";
 import { images } from "@/content/images";
 
@@ -63,6 +64,7 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
     setSource(src);
     setFormKey((k) => k + 1);
     setOpen(true);
+    track("quote_form_open", { form_source: src });
     // Someone who opens the form themselves doesn't need the timed pop-up later.
     try {
       sessionStorage.setItem(SHOWN_KEY, "1");
@@ -102,6 +104,7 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
       setSource("auto-popup");
       setFormKey((k) => k + 1);
       setOpen(true);
+      track("quote_popup_view");
     };
     timer = window.setTimeout(attempt, site.leadPopup.delayMs);
     return () => window.clearTimeout(timer);
@@ -156,7 +159,7 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
                 <p className="mt-3 font-display text-[1.7rem] leading-tight">Designing spaces for a better tomorrow.</p>
                 <ul className="mt-5 flex flex-col gap-2 text-sm text-cream/85">
                   <li className="inline-flex items-center gap-1.5">
-                    <BadgeCheck className="size-4 text-gold" /> Free consultation, no obligation
+                    <BadgeCheck className="size-4 text-gold" /> {site.offer.enabled ? `${site.offer.label}, no obligation` : "Free consultation, no obligation"}
                   </li>
                   <li className="inline-flex items-center gap-1.5">
                     <Clock3 className="size-4 text-gold" /> Quick call-back from our team
@@ -174,7 +177,16 @@ export function ConsultationProvider({ children }: { children: React.ReactNode }
                 <div className="flex items-center gap-2.5">
                   <Image src="/images/brand/logo-mark.png" alt="Build Smart" width={70} height={48} className="h-6 w-auto sm:h-7" />
                   <span className="h-3.5 w-px bg-cream/25" aria-hidden="true" />
-                  <span className="text-[0.6rem] font-semibold uppercase tracking-[0.24em] text-gold sm:text-[0.65rem]">Free consultation</span>
+                  <span className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-gold sm:text-[0.65rem] sm:tracking-[0.24em]">
+                    {site.offer.enabled ? (
+                      <>
+                        <span className="sm:hidden">Free · worth {site.offer.value}</span>
+                        <span className="hidden sm:inline">Free consultation · worth {site.offer.value}</span>
+                      </>
+                    ) : (
+                      "Free consultation"
+                    )}
+                  </span>
                 </div>
                 <p className="mt-2.5 font-display text-[1.8rem] leading-[1.05] sm:mt-3 sm:text-[2.2rem]">{site.leadPopup.title}</p>
                 <p className="mt-1.5 text-[0.8rem] leading-relaxed text-cream/70 sm:mt-2 sm:text-sm">

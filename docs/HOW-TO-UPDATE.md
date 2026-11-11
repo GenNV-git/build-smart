@@ -237,6 +237,57 @@ It is polite by design: it shows **at most once per visit**, never on the Contac
 
 ---
 
+## The consultation offer ("worth ₹5,000")
+
+`src/content/site.ts` → `offer`. Change `value` and the two lines of text to change it everywhere (home page badge, quote pop-up, form intro, the dark "Ready to transform your space?" banners). `enabled: false` hides it.
+Only advertise a value the business genuinely stands behind.
+
+---
+
+## The opening screen (Build Smart logo for 1 second)
+
+Shown when the site is opened or reloaded — not when moving between pages. It is in `src/components/ui/Splash.tsx`.
+- Change the time: `--splash-time: 1s;` in `src/app/globals.css` (search for "Opening screen").
+- Remove it: delete the line `<Splash />` in `src/app/layout.tsx`.
+
+---
+
+## Animated graphics
+
+All in `src/components/motion/` and switched off automatically for visitors who ask their phone for reduced motion:
+
+| Graphic | Where | File |
+| --- | --- | --- |
+| Turning compass rings + drifting gold light | Dark banner at the top of every page | `OrbitRings.tsx`, `GoldDust.tsx` |
+| Moving band of services | Home page, under "About Build Smart" | `ServiceMarquee.tsx` (words come from `services.ts`) |
+| House line-drawing that sketches itself | "Our Process" section | `BlueprintArt.tsx` (`variant="house"`) |
+| Floor-plan line-drawing | Projects page, "More homes are on the way" | `BlueprintArt.tsx` (`variant="plan"`) |
+| Process line that grows, icons that draw in, light sweep on the gold button | Home page | `globals.css` ("Animated graphics") |
+
+To remove one, delete its line (e.g. `<ServiceMarquee />` in `src/app/page.tsx`).
+
+---
+
+## Google Tag Manager, Google Search Console & SEO
+
+**Tag Manager.** Create a container at <https://tagmanager.google.com> and copy its ID (`GTM-XXXXXXX`). Add it in Vercel → Settings → Environment Variables as `NEXT_PUBLIC_GTM_ID` (type *Config*), then redeploy. While it is empty no tracking code loads at all. Google Analytics, Google Ads conversions and the Meta Pixel are then added *inside* Tag Manager — no code changes. The site already sends these events for you to use as triggers:
+
+| Event | When |
+| --- | --- |
+| `generate_lead` | an enquiry was sent (`form_source`, `project_type`) — use this as your **conversion** |
+| `lead_form_start` | a visitor started typing in a form |
+| `quote_popup_view` / `quote_form_open` | the timed pop-up appeared / a quote button was pressed |
+| `contact_click` | Call, WhatsApp or Email was tapped (`method`) |
+
+The Privacy Policy changes its cookies section by itself as soon as a Tag Manager ID is set.
+
+**Search Console.** At <https://search.google.com/search-console> add `https://www.buildsmart.org.in`, choose the **HTML tag** method and copy only the code inside `content="…"` into Vercel as `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`; redeploy, press *Verify*, then submit the sitemap `https://www.buildsmart.org.in/sitemap.xml`.
+
+**The words Google shows.** Page titles and descriptions are at the top of each page file (`pageMeta({ title, description … })`); the site-wide description and keyword list are `seoDescription` and `seoKeywords` in `src/content/site.ts`.
+**Most important for local searches:** fill in `serviceArea` in `site.ts` (e.g. `"Chennai"`). It is then added automatically to the home-page title, descriptions and Google's business details. Also create a free **Google Business Profile** for Build Smart and link it to this website.
+
+---
+
 ## Part 3 — Getting the form submissions (enquiries)
 
 Every enquiry contains: name, phone/WhatsApp, project type, city, and (if filled) budget, preferred contact time and message, plus the date and which form it came from.
@@ -258,6 +309,10 @@ The `data` folder stays on your computer only — it's never uploaded or publish
 Works on your computer **and** the live site (Vercel, Hostinger, a VPS), and lets you read enquiries on your phone — each one arrives as a row with a tap-to-chat WhatsApp link and a Status column for follow-up.
 
 Follow **`docs/GOOGLE-SHEETS-SETUP.md`** — about 10 minutes, once. The script to paste is ready in `docs/google-sheets/BuildSmart-Enquiries.gs` with its secret filled in; you then create `.env.local` with two lines (the web-app link and that secret) and check it with `npm run test-sheet`.
+
+### Forms that were filled in but not sent
+
+If a visitor types a name and phone number and leaves without pressing the button, those details still reach the sheet as a yellow **"Not submitted"** row; if they send the form later, the same row is completed. Details, and the one-time script update this needs, are in `docs/GOOGLE-SHEETS-SETUP.md` → *"Not submitted" rows*. Switch: `saveIncomplete` in `src/content/site.ts`.
 
 ### If you host on your own server (VPS)
 

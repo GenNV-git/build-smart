@@ -1,4 +1,6 @@
 import Image from "@/components/ui/Image";
+import { OrbitRings } from "@/components/motion/OrbitRings";
+import { GoldDust } from "@/components/motion/GoldDust";
 
 /** Cinematic dark banner used at the top of inner pages. */
 export function PageHero({
@@ -21,6 +23,8 @@ export function PageHero({
       <Image src={image.src} alt={image.alt} fill priority sizes="100vw" className="-z-20 object-cover opacity-55" style={{ objectPosition: image.position || "50% 50%" }} />
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgb(25_22_19/0.94)_0%,rgb(36_23_15/0.82)_45%,rgb(36_23_15/0.45)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-b from-transparent to-espresso/60" />
+      <OrbitRings className="-right-24 top-1/2 -z-[5] w-[18rem] -translate-y-1/2 opacity-70 sm:w-[26rem] lg:right-[3%] lg:w-[32rem] lg:opacity-100" />
+      <GoldDust className="-z-[5]" />
       <div className="container-lux">
         <div className="max-w-3xl" data-reveal>
           <p className="eyebrow eyebrow-light">{eyebrow}</p>

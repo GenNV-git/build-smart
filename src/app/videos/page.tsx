@@ -9,18 +9,20 @@ import { VideoGallery } from "@/components/video/VideoGallery";
 import { InstagramIcon, YouTubeIcon } from "@/components/ui/Icons";
 import { CtaBanner } from "@/components/layout/CtaBanner";
 import { images } from "@/content/images";
+import { breadcrumbLd, pageMeta } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
 
-export const metadata: Metadata = {
-  title: "Videos & Reels",
-  description: "Site visits, project progress, handovers and behind-the-scenes Reels and Shorts from Sanjay and the Build Smart team.",
-  alternates: { canonical: "/videos" },
-  openGraph: { title: "Videos & Reels | Build Smart", url: "/videos" },
-};
+export const metadata: Metadata = pageMeta({
+  title: "Site Visits, Handovers & Project Videos",
+  description: "Watch site visits, project progress, home handovers and behind-the-scenes Reels and Shorts from Sanjay and the Build Smart team.",
+  path: "/videos",
+});
 
 export default function VideosPage() {
   const configured = videos.filter((v) => isSet(v.url)).length;
   return (
     <>
+      <JsonLd data={breadcrumbLd([{ name: "Videos", path: "/videos" }])} />
       <PageHero
         eyebrow="Videos & Reels"
         title="Beyond the Blueprint."

@@ -2,17 +2,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/ui/LegalPage";
 import { isSet, site, whatsappLink } from "@/content/site";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Privacy Policy",
   description: "How Build Smart collects, uses, stores and protects the information you share through this website, and how to exercise your rights.",
-  alternates: { canonical: "/privacy-policy" },
-};
+  path: "/privacy-policy",
+});
 
 /** Edit these two lines if the policy changes. */
-const LAST_UPDATED = "30 October 2026";
+const LAST_UPDATED = "11 November 2026";
 /** How long enquiries that don't become a project are kept after the last contact. */
 const ENQUIRY_RETENTION = "two years";
+/** How long details from a form that was started but never sent are kept. */
+const UNSENT_RETENTION = "90 days";
+/** These two follow the settings in src/content/site.ts, so the policy always matches what the site really does. */
+const savesUnsentForms = site.form.saveIncomplete;
+const usesTagManager = isSet(site.analytics.gtmId);
 
 const telHref = (n: string) => `tel:${n.replace(/[^\d+]/g, "")}`;
 
@@ -57,7 +63,18 @@ export default function PrivacyPage() {
       <h2>In short</h2>
       <ul>
         <li>We only collect what you type into our enquiry form, and we use it only to reply to your enquiry and plan your project.</li>
-        <li>We don&rsquo;t sell your data, and we don&rsquo;t use advertising or tracking cookies.</li>
+        {savesUnsentForms && (
+          <li>
+            If you type your name and phone number into the form but don&rsquo;t send it, we may save those details and contact you once to
+            offer help.
+          </li>
+        )}
+        <li>
+          We don&rsquo;t sell your data.{" "}
+          {usesTagManager
+            ? "We use Google Tag Manager to measure visits and the results of our advertising."
+            : "We don\u2019t use advertising or tracking cookies."}
+        </li>
         <li>You can ask us to show, correct or delete your data, or to stop contacting you, at any time.</li>
       </ul>
 
@@ -72,6 +89,16 @@ export default function PrivacyPage() {
           the date and time of the enquiry, which form you used, and a record that you agreed to be contacted.
         </li>
       </ul>
+      {savesUnsentForms && (
+        <p>
+          <strong>Forms you start but don&rsquo;t send.</strong> Once you have typed your name and a phone number into an enquiry form, the
+          details entered so far may be saved to our enquiry register even if you close the form or leave the page without pressing the
+          button. They are marked &ldquo;not submitted&rdquo;. We use them only to contact you once, to ask whether you would like help
+          with your enquiry. If you send the form afterwards, the same record is simply completed. If you don&rsquo;t, and you don&rsquo;t
+          ask us to continue, the record is deleted within {UNSENT_RETENTION} &mdash; or straight away if you ask us to (see &ldquo;Your
+          rights&rdquo; below).
+        </p>
+      )}
       <p>
         Please don&rsquo;t include sensitive information (such as financial account details or health information) in your message &mdash; we
         don&rsquo;t need it to prepare a consultation.
@@ -91,8 +118,11 @@ export default function PrivacyPage() {
         <li>if you go ahead with a project, manage that project (the project itself is covered by its written agreement).</li>
       </ul>
       <p>
-        We rely on the <strong>consent</strong> you give when you tick the box on the form. We will not send you unrelated marketing
-        messages unless you separately agree to receive them.
+        We rely on the <strong>consent</strong> you give when you tick the box on the form
+        {savesUnsentForms
+          ? " and, for a form you started but did not send, on your voluntarily giving us your number to enquire about our services."
+          : "."}{" "}
+        We will not send you unrelated marketing messages unless you separately agree to receive them.
       </p>
 
       <h2>3. Where it is stored and who can see it</h2>
@@ -105,6 +135,9 @@ export default function PrivacyPage() {
         <li>our website hosting provider &mdash; to run this website and deliver your enquiry;</li>
         <li>Google (Google Sheets and Gmail) &mdash; to store enquiries and notify our team;</li>
         <li>WhatsApp (Meta) &mdash; only if you choose to chat with us on WhatsApp.</li>
+        {usesTagManager && (
+          <li>Google (Tag Manager and the measurement or advertising tools connected to it) &mdash; to understand how the website is used.</li>
+        )}
       </ul>
       <p>
         These providers may store data on servers outside India. Where they do, it is protected by their security measures and
@@ -175,10 +208,23 @@ export default function PrivacyPage() {
       <ContactDetails />
 
       <h2>8. Cookies and browser storage</h2>
-      <p>
-        This website does <strong>not</strong> use advertising, analytics or tracking cookies. It saves two small, anonymous notes in your
-        own browser so it doesn&rsquo;t pester you:
-      </p>
+      {usesTagManager ? (
+        <>
+          <p>
+            We use <strong>Google Tag Manager</strong> to load measurement and advertising tools (for example Google Analytics, Google Ads
+            or the Meta Pixel). These tools may set cookies and collect information such as the pages you view, the buttons you tap, your
+            approximate location and your device type, so that we can understand how the website is used and how our advertising
+            performs. We do not send your name, phone number or message to these tools. You can block or delete these cookies in your
+            browser settings, and opt out of personalised advertising in your Google and Meta ad settings.
+          </p>
+          <p>The website also saves two small, anonymous notes in your own browser so it doesn&rsquo;t pester you:</p>
+        </>
+      ) : (
+        <p>
+          This website does <strong>not</strong> use advertising, analytics or tracking cookies. It saves two small, anonymous notes in
+          your own browser so it doesn&rsquo;t pester you:
+        </p>
+      )}
       <ul>
         <li>
           that the &ldquo;Get a Free Quote&rdquo; pop-up has already been shown during this visit (cleared when you close the tab);

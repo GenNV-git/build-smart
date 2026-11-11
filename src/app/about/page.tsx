@@ -7,6 +7,8 @@ import { journeyPhotosFor } from "@/lib/journey-photos";
 import { videos } from "@/content/videos";
 import { isSet, site } from "@/content/site";
 import { ConsultButton } from "@/components/forms/ConsultButton";
+import { OrbitRings } from "@/components/motion/OrbitRings";
+import { GoldDust } from "@/components/motion/GoldDust";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { DevNote } from "@/components/ui/DevNote";
 import { serviceIcons } from "@/components/ui/Icons";
@@ -15,21 +17,29 @@ import { StoryButton } from "@/components/about/StoryButton";
 import { VideoCard } from "@/components/video/VideoCard";
 import { FollowSanjay } from "@/components/layout/FollowSanjay";
 import { CtaBanner } from "@/components/layout/CtaBanner";
+import { breadcrumbLd, pageMeta, withArea } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
 
-export const metadata: Metadata = {
-  title: "About Sanjay",
-  description: `Meet ${founder.name}, the construction professional and creator behind Build Smart — his journey, values and vision for every home.`,
-  alternates: { canonical: "/about" },
-  openGraph: { title: "About Sanjay | Build Smart", url: "/about" },
-};
+export const metadata: Metadata = pageMeta({
+  title: "About Sanjay — Founder & Civil Engineer",
+  description: withArea(
+    `Meet ${site.founder.fullName}, the civil engineer and founder behind Build Smart — his journey from site work to building homes and interiors families trust.`,
+  ),
+  path: "/about",
+  image: founder.portrait?.src,
+  imageAlt: `${site.founder.fullName}, founder of Build Smart`,
+});
 
 export default function AboutPage() {
   const gallery = videos.slice(0, 4);
   return (
     <>
+      <JsonLd data={breadcrumbLd([{ name: "About Sanjay", path: "/about" }])} />
       {/* Founder introduction */}
       <section aria-labelledby="about-hero-title" className="relative isolate overflow-hidden bg-espresso pb-24 pt-32 text-cream sm:pt-40">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_80%_20%,rgb(74_43_28/0.9),transparent),radial-gradient(40%_50%_at_0%_100%,rgb(74_43_28/0.6),transparent)]" />
+        <OrbitRings className="-right-28 top-8 -z-[5] w-[18rem] opacity-60 sm:w-[26rem] lg:right-[1%] lg:top-[6%] lg:w-[36rem] lg:opacity-90" />
+        <GoldDust className="-z-[5]" />
         <div className="container-lux grid items-center gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
           <div className="relative mx-auto w-full max-w-[19rem] sm:max-w-md lg:mx-0" data-reveal>
             <div className="absolute -inset-3 rounded-[2rem] border border-gold/25" aria-hidden="true" />

@@ -17,7 +17,8 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
-import { leadSchema, type LeadFieldErrors } from "@/lib/lead-schema";
+import { hasNameAndPhone, leadSchema, type LeadFieldErrors } from "@/lib/lead-schema";
+import { track } from "@/lib/track";
 import { site, whatsappLink } from "@/content/site";
 import { WhatsAppIcon } from "@/components/ui/Icons";
 
@@ -47,13 +48,27 @@ const empty: Values = {
   website: "",
 };
 
+/** A fresh id for one "sitting" at a form — ties a not-submitted save to the enquiry that may follow it. */
+function newDraftId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
+/** How long a visitor must pause (with a name and phone typed) before the details are saved as "Not submitted". */
+const INCOMPLETE_IDLE_MS = 25_000;
+
 const fieldOrder: (keyof Values)[] = ["name", "phone", "projectType", "location", "budget", "contactTime", "message", "consent"];
 
 export function ConsultationForm({
   variant = "full",
   source,
   title = "Let's Plan Your Dream Space",
-  intro = "Share a few details and our team will get in touch for an initial consultation.",
+  intro = site.offer.enabled
+    ? `Share a few details and we'll call you for your free consultation — worth ${site.offer.value}.`
+    : "Share a few details and our team will get in touch for an initial consultation.",
   headingLevel = "h2",
   dense = false,
   headingClassName = "",
@@ -106,7 +121,71 @@ export function ConsultationForm({
   }, [dense]);
   const pair = dense && narrow; // Budget + Best time on one row
 
+  /* ── Started-but-not-sent forms ─────────────────────────────────────────────────────────────
+     When a name and a valid phone number have been typed and the visitor leaves without pressing the button
+     (closes the pop-up, switches tab, leaves the page, or pauses for a while), the details go to the sheet
+     marked "Not submitted". Sending the form afterwards completes that same row. Switch: site.form.saveIncomplete. */
+  const draftId = useRef("");
+  const latest = useRef({ values, status });
+  latest.current = { values, status };
+  const lastSaved = useRef("");
+  const started = useRef(false);
+
+  const saveIncomplete = useRef(() => {});
+  saveIncomplete.current = () => {
+    if (!site.form.saveIncomplete) return;
+    const { values: v, status: st } = latest.current;
+    if (st === "submitting" || st === "success" || v.website || !hasNameAndPhone(v)) return;
+    if (!draftId.current) draftId.current = newDraftId();
+    const body = JSON.stringify({
+      draftId: draftId.current,
+      name: v.name,
+      phone: v.phone,
+      projectType: v.projectType,
+      location: v.location,
+      budget: v.budget,
+      contactTime: v.contactTime,
+      message: v.message,
+      source,
+    });
+    if (body === lastSaved.current) return; // nothing new since the last save
+    lastSaved.current = body;
+    try {
+      const sent = navigator.sendBeacon?.("/api/leads/incomplete", new Blob([body], { type: "application/json" }));
+      if (!sent) void fetch("/api/leads/incomplete", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
+    } catch {
+      /* never disturb the visitor */
+    }
+  };
+
+  // Leaving: tab hidden / page closed / form removed (pop-up closed, moved to another page).
+  useEffect(() => {
+    if (!site.form.saveIncomplete) return;
+    const onHide = () => {
+      if (document.visibilityState === "hidden") saveIncomplete.current();
+    };
+    const onPageHide = () => saveIncomplete.current();
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onPageHide);
+      saveIncomplete.current();
+    };
+  }, []);
+
+  // Pausing: nothing typed for a while.
+  useEffect(() => {
+    if (!site.form.saveIncomplete || status !== "idle" || !hasNameAndPhone(values)) return;
+    const t = window.setTimeout(() => saveIncomplete.current(), INCOMPLETE_IDLE_MS);
+    return () => window.clearTimeout(t);
+  }, [values, status]);
+
   function set<K extends keyof Values>(key: K, value: Values[K]) {
+    if (!started.current && key !== "website" && value) {
+      started.current = true;
+      track("lead_form_start", { form_source: source });
+    }
     setValues((v) => ({ ...v, [key]: value }));
     if (errors[key as keyof LeadFieldErrors]) setErrors((e) => ({ ...e, [key]: undefined }));
   }
@@ -124,7 +203,8 @@ export function ConsultationForm({
     if (status === "submitting") return;
     setServerError("");
 
-    const payload = { ...values, source };
+    // draftId is only sent when "not submitted" details may already be in the sheet, so that row gets completed.
+    const payload = { ...values, source, ...(lastSaved.current && draftId.current ? { draftId: draftId.current } : {}) };
     const result = leadSchema.safeParse(payload);
     if (!result.success) {
       const next: LeadFieldErrors = {};
@@ -155,6 +235,11 @@ export function ConsultationForm({
       try {
         localStorage.setItem("bs-enquiry-sent", String(Date.now()));
       } catch {}
+      track("generate_lead", { form_source: source, project_type: values.projectType });
+      // This sitting is finished: a later enquiry from the same form starts a new one.
+      draftId.current = "";
+      lastSaved.current = "";
+      started.current = false;
       setSubmittedName(values.name.trim().split(/\s+/)[0] || "");
       setValues(empty);
       setErrors({});

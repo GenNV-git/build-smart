@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/ui/LegalPage";
 import { isSet, site } from "@/content/site";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Terms & Conditions",
   description: "The terms for using the Build Smart website, sending an enquiry and requesting a consultation or quotation.",
-  alternates: { canonical: "/terms" },
-};
+  path: "/terms",
+});
 
 /** Edit this line if the terms change. */
 const LAST_UPDATED = "30 October 2026";

@@ -1,4 +1,4 @@
-import type { LeadRecord } from "./types";
+import type { SubmittedLead } from "./types";
 
 /**
  * PHASE 2 — WhatsApp lead notification (integration point)
@@ -18,7 +18,7 @@ import type { LeadRecord } from "./types";
  * configure, send a test enquiry, and confirm delivery before relying on it.
  */
 
-export function formatLeadMessage(lead: LeadRecord): string {
+export function formatLeadMessage(lead: SubmittedLead): string {
   const lines = [
     "New Build Smart Website Enquiry",
     "",
@@ -36,7 +36,7 @@ export function formatLeadMessage(lead: LeadRecord): string {
 
 export type NotifyResult = { attempted: boolean; delivered: boolean; provider: string; error?: string };
 
-export async function notifyOwnerOnWhatsApp(lead: LeadRecord): Promise<NotifyResult> {
+export async function notifyOwnerOnWhatsApp(lead: SubmittedLead): Promise<NotifyResult> {
   const provider = (process.env.WHATSAPP_NOTIFY_PROVIDER || "none").toLowerCase();
   if (provider === "none") return { attempted: false, delivered: false, provider };
 
@@ -51,7 +51,7 @@ export async function notifyOwnerOnWhatsApp(lead: LeadRecord): Promise<NotifyRes
 }
 
 /** Meta WhatsApp Cloud API. Template mode works any time; text mode only inside a 24-hour service window. */
-async function sendViaMetaCloud(lead: LeadRecord): Promise<NotifyResult> {
+async function sendViaMetaCloud(lead: SubmittedLead): Promise<NotifyResult> {
   const token = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   const to = (process.env.WHATSAPP_OWNER_NUMBER || "").replace(/\D/g, "");
@@ -94,7 +94,7 @@ async function sendViaMetaCloud(lead: LeadRecord): Promise<NotifyResult> {
   return { attempted: true, delivered: true, provider: "meta-cloud" };
 }
 
-async function sendViaWebhook(lead: LeadRecord): Promise<NotifyResult> {
+async function sendViaWebhook(lead: SubmittedLead): Promise<NotifyResult> {
   const url = process.env.WHATSAPP_WEBHOOK_URL;
   if (!url) throw new Error("WHATSAPP_WEBHOOK_URL is not set");
   const res = await fetch(url, {
