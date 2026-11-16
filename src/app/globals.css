@@ -401,8 +401,8 @@ dialog.photo-dialog::backdrop { background: rgb(15 12 10 / 0.94); backdrop-filte
 .ie-stage, .ie-track { display: none; }
 html.js.intro-on .ie-pin { position: sticky; top: 0; }
 html.js.intro-on.intro-play .ie-pin { z-index: 11; }
-html.js.intro-on .ie-track { display: block; height: 400svh; background: var(--color-espresso); }
-@media (min-width: 768px) { html.js.intro-on .ie-track { height: 520svh; } }
+html.js.intro-on .ie-track { display: block; height: 560svh; background: var(--color-espresso); }
+@media (min-width: 768px) { html.js.intro-on .ie-track { height: 580svh; } }
 html.js.intro-on.intro-leaving .ie-track { display: none; }
 html.js.intro-on .ie-stage {
   display: block; position: absolute; top: 0; left: 0; z-index: 30; width: 100%; height: var(--sh); overflow: hidden;
@@ -493,15 +493,28 @@ html.js.intro-on:not(.intro-ready) .ie-track { animation: ie-failsafe-track 0.01
 .ie-bloom { inset: 0; mix-blend-mode: screen; background: radial-gradient(36% 52% at 50% 48%, rgb(255 226 178 / 0.4), rgb(255 210 150 / 0) 72%); }
 .ie-dust { opacity: 0.8; }
 
-/* Rooms */
-.ie-room { position: absolute; inset: 0; overflow: hidden; opacity: 0; visibility: hidden; }
-.ie-room img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 55%; will-change: transform; }
+/* Rooms (computers: full-screen; phones and tall screens: the whole picture, edge to edge, on a blurred backdrop) */
+.ie-room { position: absolute; inset: 0; overflow: hidden; opacity: 0; visibility: hidden; isolation: isolate; }
+.ie-room-frame { position: absolute; inset: 0; overflow: hidden; transform-origin: 50% 55%; will-change: transform; }
+.ie-room-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ie-room-bg { display: none; }
 .ie-scrim {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(90deg, rgb(20 12 7 / 0.8) 0%, rgb(20 12 7 / 0.45) 30%, rgb(20 12 7 / 0) 58%), linear-gradient(0deg, rgb(20 12 7 / 0.55), rgb(20 12 7 / 0) 38%);
 }
-@media (max-aspect-ratio: 4/5) {
-  .ie-scrim { background: linear-gradient(0deg, rgb(20 12 7 / 0.66) 0%, rgb(20 12 7 / 0.36) 26%, rgb(20 12 7 / 0) 46%), linear-gradient(180deg, rgb(20 12 7 / 0.38), rgb(20 12 7 / 0) 18%); }
+.ie-stage.is-tall .ie-room { background: #1d130c; }
+.ie-stage.is-tall .ie-room-bg {
+  display: block; position: absolute; inset: -6%; width: 112%; height: 112%; max-width: none; object-fit: cover; opacity: 0.95;
+}
+.ie-stage.is-tall .ie-scrim {
+  background: radial-gradient(130% 75% at 50% 40%, rgb(20 12 7 / 0.18), rgb(20 12 7 / 0.42) 70%, rgb(20 12 7 / 0.62)),
+    linear-gradient(180deg, rgb(20 12 7 / 0.4), rgb(20 12 7 / 0) 14%, rgb(20 12 7 / 0) 72%, rgb(20 12 7 / 0.45));
+}
+.ie-stage.is-tall .ie-room-frame {
+  inset: auto 0; left: 0; right: 0; transform-origin: 0 0; z-index: 1;
+  border-block: 1px solid rgb(214 177 109 / 0.45); box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.75), 0 0 0 1px rgb(0 0 0 / 0.2);
+  /* a soft reflection on a polished floor (Safari and Chrome) */
+  -webkit-box-reflect: below 0 linear-gradient(transparent 62%, rgb(0 0 0 / 0.22));
 }
 
 /* The arched frame of light into the homepage */
@@ -576,6 +589,9 @@ html.js.intro-on:not(.intro-ready) .ie-track { animation: ie-failsafe-track 0.01
   .ie-cap { left: 1.4rem; right: 1.4rem; bottom: max(3.4rem, calc(env(safe-area-inset-bottom) + 2.6rem)); }
   .ie-cap-title { font-size: clamp(1.8rem, 8.6vw, 2.7rem); }
 }
+/* tall screens: the words sit just under the picture (the script sets "top") */
+.ie-stage.is-tall .ie-cap { left: 1.4rem; right: 1.4rem; bottom: auto; }
+.ie-stage.is-tall .ie-cap-title { font-size: clamp(1.6rem, 7.4vw, 2.6rem); margin-top: 0.7rem; }
 
 /* journey progress: a hairline along the top edge (the bottom edge can sit under a phone's browser bar) */
 .ie-progress { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: rgb(214 177 109 / 0.12); }

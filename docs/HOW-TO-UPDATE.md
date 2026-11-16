@@ -254,7 +254,10 @@ Shown when the site is opened or reloaded — not when moving between pages. It 
 
 ## The cinematic entrance ("Open the door to better living")
 
-When someone opens the home page, two wooden doors with the **B** and **S** handles fill the screen. As they scroll, the doors open, the camera walks into the hall, then the living room, bedroom and kitchen, and passes through an arch of light into the normal home page. The header, buttons and pop-up wait until it has finished.
+When someone opens the home page, two wooden doors with the **B** and **S** handles fill the screen. As they scroll, the doors open and the camera walks into the hall, then keeps walking through the home — each room dissolves into the next, with no more doors. An arch of light leads into the normal home page. The header, buttons and pop-up wait until it has finished.
+
+- **Phones (and tablets held upright)** use your own four pictures: hall, dining room, bedroom, kitchen. The camera pulls back so each room is seen **whole**, edge to edge, with its words beneath it; then it glides in close to the best part of the room while the next room dissolves in, close up, and pulls back again. The hall picks up exactly where the doors left off.
+- **Computers (and phones turned sideways)** use wide pictures of the hall, living room, bedroom and kitchen that fill the screen.
 
 **When it plays**
 - On the home page, the first time it is opened in a browser tab. After it has been seen (or skipped) it does not play again in that tab.
@@ -265,17 +268,19 @@ When someone opens the home page, two wooden doors with the **B** and **S** hand
 
 | To change… | Where |
 | --- | --- |
-| The pictures (entrance, doors, B/S handles, hall, rooms) | `public/images/intro/` — replace a file with the **same name and the same shape** (`living.webp` landscape, `living-portrait.webp` tall for phones, `hall.webp` 2600 × 2261). The doors and handles are placed exactly on `entrance.webp`, so replace those only together. Pictures in this folder are not shrunk automatically, so keep each under about 500 KB. |
-| The words ("Every beautiful space…", "Designed for the way you live." …) | `src/components/intro/EntranceIntro.tsx` — the `ROOMS` list and the text near the bottom of the file |
-| How long it is (how much scrolling) | `src/app/globals.css`, search for `.ie-track` — `400svh` on phones, `520svh` on larger screens (100svh = one screen height) |
-| When each scene starts | `SCENES` and `ROOMS` in `EntranceIntro.tsx` (0 = start, 1 = home page) |
+| The phone pictures | `public/images/intro/` — `hall-m.webp`, `living-m.webp` (the dining room), `bedroom-m.webp`, `kitchen-m.webp`: 1672 × 941 each (16:9), under about 300 KB. Each has a tiny blurred copy (`*-blur.webp`) used as the warm background, and the hall also has `hall-tall.webp` — the middle of the hall picture, seen through the doors. Your originals are in `src/components/intro_images/`; after replacing a picture, ask Claude to make these files again (the hall's doorway crop must match). |
+| Where the camera goes close on phones | `focus` for each room in `ROOMS` in `EntranceIntro.tsx` (0–1 across the picture, e.g. `0.54` = a little right of the middle); `CLOSE` sets how close (2 = half of the picture's width fills the screen) |
+| The computer pictures | `public/images/intro/` — replace a file with the **same name and the same shape** (`living.webp` / `kitchen.webp` 16:9 and `bedroom.webp` 16:10, about 2600 px wide, each with a smaller `-1280` copy; `hall.webp` 2600 × 2261). The doors and handles are placed exactly on `entrance.webp`, so replace those only together. Pictures in this folder are not shrunk automatically, so keep each under about 500 KB. |
+| The words ("Every beautiful space…", "Designed for the way you live." …) | `src/components/intro/EntranceIntro.tsx` — the `ROOMS` list (`title`; `label` is the small name above it, `labelM` the name on phones where it differs) and the text near the bottom of the file |
+| How long it is (how much scrolling) | `src/app/globals.css`, search for `.ie-track` — `560svh` on phones, `580svh` on larger screens (100svh = one screen height) |
+| When each scene starts | `SCENES`, and `in` for each room in `ROOMS`, in `EntranceIntro.tsx` (0 = start, 1 = home page) |
 | Switch it off completely | `src/app/page.tsx`: replace `<EntranceIntro><Hero /></EntranceIntro>` with `<Hero />` |
 
 In Google Tag Manager the events `intro_complete` and `intro_skip` show how many visitors watch it to the end.
 
-**Where the room pictures come from.** The hall, living room, bedroom and kitchen are free photos from Unsplash (free for commercial websites under the [Unsplash License](https://unsplash.com/license); no credit is required), colour-matched to one warm look:
+**Where the pictures come from.** The phone pictures are Build Smart's own set (supplied by the owner, in `src/components/intro_images/`). The computer pictures of the hall, living room, bedroom and kitchen are free photos from Unsplash (free for commercial websites under the [Unsplash License](https://unsplash.com/license); no credit is required), colour-matched to one warm look:
 hall, living room and kitchen by [Aalo Lens](https://unsplash.com/@aalolens) — [hall](https://unsplash.com/photos/Ez7fz5mavj0), [living room](https://unsplash.com/photos/-QCjahEjubY), [kitchen](https://unsplash.com/photos/UlIj_qKpgCw); bedroom by [mahmoud azmy](https://unsplash.com/photos/IUTewwzaFeM).
-They are not Build Smart projects — when you have renders or photos of your own homes, put them in their place.
+The Unsplash photos are not Build Smart projects — when you have wide renders or photos of your own homes, put them in their place.
 
 ---
 

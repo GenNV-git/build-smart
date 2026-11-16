@@ -18,6 +18,13 @@ import { GoldDust } from "@/components/motion/GoldDust";
  * - While it plays, a tall empty "track" sits below the hero and the hero + this stage stay pinned to the screen.
  *   Scrolling through the track drives the scenes; at the end the stage has faded away, the real hero is on screen,
  *   and the track is removed (the scroll position is adjusted so nothing jumps).
+ * - The journey: the B|S front doors open into the hall; the camera keeps walking forward through the house — hall,
+ *   living (dining on phones), bedroom, kitchen — each view dissolving into the next; an arch of light leads into the
+ *   homepage.
+ * - Phones (tall screens) are designed first: each room arrives as a close-up, the camera pulls back to show the whole
+ *   room (the complete picture, edge to edge, on a warm blurred backdrop, its words beneath), then glides in to its best
+ *   detail before the next room. Phone pictures: public/images/intro/*-m.webp (from the owner's set in
+ *   src/components/intro_images); the focus point of each is `focus` in ROOMS.
  * - Pictures: public/images/intro/. Words and timings: SCENES / ROOMS below. Track length: ".ie-track" in globals.css.
  */
 
@@ -37,37 +44,55 @@ const HALL_BELOW = 216; // from eye level to the hall's bottom edge
 
 /** Scroll positions (0 = top of the intro, 1 = homepage) for each part of the journey. */
 const SCENES = {
-  helloOut: [0.012, 0.06],
-  doors: [0.035, 0.3],
-  approach: [0.05, 0.3],
-  doorCaption: [0.1, 0.145, 0.235, 0.285],
-  dolly: [0.27, 0.45],
-  hallPush: [0.4, 0.57],
-  archIn: [0.885, 0.915],
-  heroUnder: [0.915, 0.93],
-  archPass: [0.92, 1],
-  glowOut: [0.95, 0.99],
-  wallOut: [0.975, 0.998],
-  chrome: 0.96,
+  helloOut: [0.01, 0.045],
+  doors: [0.025, 0.2],
+  approach: [0.03, 0.2],
+  doorCaption: [0.065, 0.1, 0.165, 0.2],
+  dolly: [0.18, 0.3],
+  hallPush: [0.27, 0.42],
+  archIn: [0.895, 0.925],
+  heroUnder: [0.925, 0.94],
+  archPass: [0.93, 1],
+  glowOut: [0.955, 0.99],
+  wallOut: [0.978, 0.998],
+  chrome: 0.962,
 } as const;
 
 type Room = {
   key: string;
   label: string;
+  /** label on phones, where this place shows a different room of the set */
+  labelM?: string;
   title: string;
-  /** starts fading in at `in`, the next room covers it from `out` */
+  /** when it starts to appear (the scene before dissolves into it) */
   in: number;
-  out: number;
-  /** sideways drift of the camera, in % of the picture */
+  /** width / height of the computer picture (16:9 crops) and of the whole phone picture */
+  aspect: number;
+  aspectM: number;
+  /** sideways drift of the camera on wide screens, in % of the picture */
   pan: [number, number];
+  /** phones: the detail the camera glides in to, as fractions of the picture (x, y) */
+  focus: [number, number];
+  /** the hall on computers is the picture behind the front doors; this layer is used on phones only */
+  phoneOnly?: boolean;
 };
 
+const PHONE_ASPECT = 1672 / 941; // = PHONE_SRC
 const ROOMS: Room[] = [
-  { key: "living", label: "The Living Room", title: "Designed for the way you live.", in: 0.485, out: 0.635, pan: [1.8, -1.8] },
-  { key: "bedroom", label: "The Master Bedroom", title: "Crafted for your comfort.", in: 0.635, out: 0.775, pan: [-1.6, 1.6] },
-  { key: "kitchen", label: "The Modular Kitchen", title: "Built around your lifestyle.", in: 0.775, out: 0.885, pan: [-1.2, 1.4] },
+  { key: "hall", label: "The Grand Hall", title: "Welcome home.", in: 0.265, aspect: 1.15, aspectM: PHONE_ASPECT, pan: [0, 0], focus: [0.38, 0.72], phoneOnly: true },
+  { key: "living", label: "The Living Room", labelM: "The Dining Room", title: "Designed for the way you live.", in: 0.41, aspect: 16 / 9, aspectM: PHONE_ASPECT, pan: [1.6, -1.6], focus: [0.54, 0.6] },
+  { key: "bedroom", label: "The Master Bedroom", title: "Crafted for your comfort.", in: 0.575, aspect: 1.6, aspectM: PHONE_ASPECT, pan: [-1.4, 1.4], focus: [0.4, 0.62] },
+  { key: "kitchen", label: "The Modular Kitchen", title: "Built around your lifestyle.", in: 0.74, aspect: 16 / 9, aspectM: PHONE_ASPECT, pan: [-1.2, 1.2], focus: [0.53, 0.6] },
 ];
-const ROOM_FADE = 0.055;
+/** Phones: how close the camera comes to each room's detail (2 = half the picture's width fills the screen). */
+const CLOSE = 2.15;
+/** The phone pictures' size, and where the doorway crop of the hall (hall-tall.webp, 1082 x 941) starts in it. */
+const PHONE_SRC = [1672, 941] as const;
+const HALL_CROP_X = 211;
+/** How long one room takes to dissolve into the next as we walk on. */
+const MOVE = 0.05;
+/** When each room is left: the next room's arrival, or the arch at the end. */
+const exitOf = (i: number) => (ROOMS[i + 1] ? ROOMS[i + 1].in : SCENES.archIn[0]);
 
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const seg = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
@@ -88,6 +113,8 @@ type Geo = {
   hallCover: (z: number) => number;
   hallBase: number; // starting size of the hall (smaller on phones, which see only the middle of the doorway)
   arch: { wall: string; trim: string; floor: number; cy: number; ox: number; oy: number; ow: number; oh: number };
+  tall: boolean; // phones and other tall screens: whole pictures in a frame
+  frames: { top: number; height: number }[]; // per room, on tall screens
 };
 
 /** Height of 100lvh in pixels (the screen with the browser's bars tucked away). */
@@ -149,7 +176,15 @@ function measure(stage: HTMLElement): Geo {
 
   const hallBase = Math.min(1, hallCover(1) * 1.15);
 
-  return { vw, vh, sh, u, cx, cy, zPass, hallCover, hallBase, arch: { wall, trim, floor, cy: ty + oh * 0.55, ox: x0, oy: ty, ow, oh } };
+  // Phones: each room's whole picture, full width, placed so its words fit beneath it on the visible screen.
+  const tall = vw / sh < 1;
+  const frames = ROOMS.map((r) => {
+    const height = vw / r.aspectM;
+    // picture + its words, centred on the visible screen (a little above centre), below the logo and Skip button
+    return { top: Math.max(72, (vh - (height + 22 + 112)) / 2 - 10), height };
+  });
+
+  return { vw, vh, sh, u, cx, cy, zPass, hallCover, hallBase, tall, frames, arch: { wall, trim, floor, cy: ty + oh * 0.55, ox: x0, oy: ty, ow, oh } };
 }
 
 /** Module-level so React's development double-mount doesn't end the intro. */
@@ -191,8 +226,6 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       hall: q(".ie-hall"),
       dust: q(".ie-dust"),
       base: q(".ie-base"),
-      rooms: qa(".ie-room"),
-      roomImgs: qa(".ie-room img"),
       caps: qa(".ie-cap"),
       doorCap: q(".ie-doorcap"),
       hello: q(".ie-hello"),
@@ -207,6 +240,10 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       archSvg: q<SVGElement>(".ie-arch svg"),
       bar: q(".ie-progress > span"),
     };
+    const rooms = ROOMS.map((r) => {
+      const room = q(`.ie-room[data-room="${r.key}"]`);
+      return { room, frame: room.querySelector(".ie-room-frame") as HTMLElement };
+    });
 
     let geo = measure(stage);
     let L = 1;
@@ -237,6 +274,15 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       Object.assign(el.archGlow.style, { left: `${a.ox}px`, top: `${a.oy}px`, width: `${a.ow}px`, height: `${a.floor - a.oy}px` });
       Object.assign(el.archBloom.style, { left: `${a.ox - a.ow}px`, top: `${a.oy - a.ow * 0.5}px`, width: `${a.ow * 3}px`, height: `${geo.sh - a.oy + a.ow * 0.5}px` });
       el.arch.style.transformOrigin = `50% ${a.cy}px`;
+      stage.classList.toggle("is-tall", geo.tall);
+      rooms.forEach((r, i) => {
+        const fr = geo.frames[i];
+        r.frame.style.top = geo.tall ? `${fr.top}px` : "";
+        r.frame.style.height = geo.tall ? `${fr.height}px` : "";
+        el.caps[i].style.top = geo.tall ? `${fr.top + fr.height + 22}px` : "";
+        const lab = el.caps[i].querySelector(".ie-cap-label");
+        if (lab) lab.textContent = (geo.tall && ROOMS[i].labelM) || ROOMS[i].label;
+      });
       const r = wrap.getBoundingClientRect();
       start = r.top + window.scrollY;
       L = Math.max(1, trackEl.offsetHeight);
@@ -252,6 +298,10 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
         n.setAttribute("srcset", n.dataset.srcset!);
         n.removeAttribute("data-srcset");
       });
+      stage.querySelectorAll<HTMLImageElement>("img[data-src]").forEach((n) => {
+        n.src = n.dataset.src!;
+        n.removeAttribute("data-src");
+      });
     };
 
     const setVis = (n: HTMLElement | SVGElement, o: number) => {
@@ -264,9 +314,10 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       // Scene 01–02: the doors open, light pours in, the camera moves forward.
       const doorT = seg(p, SCENES.doors[0], SCENES.doors[1]);
       const ang = OPEN_DEG * smooth(doorT);
-      const z =
-        1 + 0.06 * smooth(seg(p, SCENES.approach[0], SCENES.approach[1])) + (geo.zPass - 1.06) * inOut(seg(p, SCENES.dolly[0], SCENES.dolly[1]));
-      const passed = seg(p, SCENES.dolly[0] + 0.1, SCENES.dolly[1]);
+      const zAt = (pp: number) =>
+        1 + 0.06 * smooth(seg(pp, SCENES.approach[0], SCENES.approach[1])) + (geo.zPass - 1.06) * inOut(seg(pp, SCENES.dolly[0], SCENES.dolly[1]));
+      const z = zAt(p);
+      const passed = seg(p, SCENES.dolly[0] + 0.07, SCENES.dolly[1]);
 
       el.box.style.transform = `scale(${r4(z)})`;
       el.leafL.style.transform = `rotateY(${r4(ang)}deg)`;
@@ -278,34 +329,77 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
 
       // Light: bright the moment the doors part, settling as the eyes adjust.
       const crack = smooth(seg(ang, 0, 9));
-      const flare = crack * lerp(1, 0.2, smooth(seg(ang, 10, OPEN_DEG))) * (1 - seg(p, SCENES.dolly[0], SCENES.dolly[0] + 0.1));
+      const flare = crack * lerp(1, 0.2, smooth(seg(ang, 10, OPEN_DEG))) * (1 - seg(p, SCENES.dolly[0], SCENES.dolly[0] + 0.07));
       setVis(el.flare, flare);
-      setVis(el.spill, crack * (1 - smooth(seg(p, SCENES.dolly[0], SCENES.dolly[0] + 0.12))));
-      setVis(el.bloom, crack * 0.85 * (1 - smooth(seg(p, 0.24, 0.4))));
+      setVis(el.spill, crack * (1 - smooth(seg(p, SCENES.dolly[0], SCENES.dolly[0] + 0.08))));
+      setVis(el.bloom, crack * 0.85 * (1 - smooth(seg(p, 0.16, 0.27))));
 
       // Scene 03: the hall, further away than the doors (it grows more slowly — depth), then the camera walks in.
-      const hallS = Math.max(geo.hallCover(z), geo.hallBase * Math.pow(z, 0.45)) * (1 + 0.2 * inOut(seg(p, SCENES.hallPush[0], SCENES.hallPush[1])));
+      // Computers: the hall dissolves into the living room as we walk on. Phones: it hands over to the whole-picture view.
+      // Phones: the hall stops where the whole-picture view takes over from it (the same picture, so the hand-over is seamless).
+      const d1 = geo.tall ? ROOMS[0].in : ROOMS[1].in;
+      const pH = geo.tall ? Math.min(p, d1) : p;
+      const zH = geo.tall ? zAt(pH) : z;
+      const hallExit = seg(pH, d1, d1 + MOVE);
+      const hallS =
+        Math.max(geo.hallCover(zH), geo.hallBase * Math.pow(zH, 0.45)) *
+        (1 + 0.2 * inOut(seg(pH, SCENES.hallPush[0], SCENES.hallPush[1]))) *
+        (1 + 0.25 * easeIn(hallExit));
       // ...and, walking in, the eyes drop from the chandelier towards the seating (never uncovering the bottom edge)
       const room = geo.cy + HALL_BELOW * geo.u * hallS - geo.sh;
-      const tilt = Math.min(geo.vh * 0.09 * smooth(seg(p, SCENES.hallPush[0], SCENES.hallPush[1])), Math.max(0, room));
+      const tilt = Math.min(geo.vh * 0.09 * smooth(seg(pH, SCENES.hallPush[0], SCENES.hallPush[1])), Math.max(0, room));
       el.hall.style.transform = `translate3d(0,${r4(-tilt)}px,0) scale(${r4(hallS)})`;
-      setVis(el.hall, ang > 0.05 && p < ROOMS[0].in + ROOM_FADE + 0.01 ? 1 : 0); // only needed once the doors part
-      setVis(el.dust, 1 - smooth(seg(p, 0.2, 0.36)));
+      setVis(el.hall, ang > 0.05 && p < d1 + (geo.tall ? 0.01 : MOVE) ? 1 : 0); // only needed once the doors part; covered by the next view
+      // where that hall picture is on the screen (its CSS box is 490 x 426 units, scaled about the eye level)
+      const hallBox = { x: geo.vw / 2 - 245 * geo.u * hallS, y: geo.cy - HALL_ABOVE * geo.u * hallS - tilt, h: 426 * geo.u * hallS };
+      setVis(el.dust, 1 - smooth(seg(p, 0.13, 0.24)));
 
-      // Scenes 04–06: living room, bedroom, kitchen — each drifts forward and is handed over to the next.
+      // Scenes 03–06: hall, living room, bedroom, kitchen — we keep walking forward and each view dissolves into the next.
       ROOMS.forEach((room, i) => {
-        const next = ROOMS[i + 1];
-        const fadeIn = smooth(seg(p, room.in, room.in + ROOM_FADE));
-        const gone = next ? p > next.in + ROOM_FADE + 0.005 : p > SCENES.heroUnder[1];
-        const o = i === ROOMS.length - 1 ? fadeIn * (1 - seg(p, SCENES.heroUnder[0], SCENES.heroUnder[1])) : fadeIn;
-        setVis(el.rooms[i], gone ? 0 : o);
-        if (o > 0 && !gone) {
-          const life = seg(p, room.in, room.out + ROOM_FADE);
-          const scale = 1.04 + 0.1 * life + 0.12 * easeIn(seg(p, room.out, room.out + ROOM_FADE));
-          const x = lerp(room.pan[0], room.pan[1], life);
-          el.roomImgs[i].style.transform = `translate3d(${r4(x)}%,0,0) scale(${r4(scale)})`;
+        const r = rooms[i];
+        const exit = exitOf(i);
+        const lastRoom = i === ROOMS.length - 1;
+        const used = geo.tall || !room.phoneOnly;
+        const arrive = geo.tall && room.phoneOnly ? (p >= room.in ? 1 : 0) : smooth(seg(p, room.in, room.in + MOVE * 0.8));
+        const gone = lastRoom ? p >= SCENES.heroUnder[1] : p >= exit + MOVE;
+        const leave = lastRoom ? seg(p, SCENES.heroUnder[0], SCENES.heroUnder[1]) : seg(p, exit, exit + MOVE);
+        const op = used && !gone ? arrive * (lastRoom ? 1 - leave : 1) : 0;
+        setVis(r.room, op);
+        if (op > 0) {
+          const life = seg(p, room.in, exit + MOVE);
+          const through = lastRoom ? 0 : easeIn(leave); // walking on: the room grows past us
+          if (geo.tall) {
+            // Zoom out, then zoom in. Each room arrives close up, the camera pulls back to the whole room (its words appear
+            // beneath it), then glides in to its best detail as the next room dissolves in, close up on its own detail.
+            // The hall arrives exactly where the doors left it — the same picture — and pulls back from there.
+            const fr = geo.frames[i];
+            const back = 1 - smooth(seg(p, room.in + (room.phoneOnly ? 0 : 0.015), room.in + 0.06));
+            const into = inOut(seg(p, room.in + 0.1, exit + 0.035));
+            const close = (fx: number) => {
+              const s = CLOSE;
+              return { x: Math.min(0, Math.max(geo.vw - geo.vw * s, geo.vw / 2 - fx * geo.vw * s)), y: geo.vh * 0.48 - (fr.height * s) / 2, s };
+            };
+            let from = close(room.focus[0]);
+            if (room.phoneOnly) {
+              const k = hallBox.h / PHONE_SRC[1]; // screen pixels per picture pixel, as seen through the doors
+              from = { x: hallBox.x - HALL_CROP_X * k, y: hallBox.y, s: (PHONE_SRC[0] * k) / geo.vw };
+            }
+            const to = close(room.focus[0]);
+            const x = from.x * back + to.x * into; // (the whole room sits at x = 0; pulling back and gliding in never overlap)
+            const y = fr.top + ((from.y - fr.top) * back + (to.y - fr.top) * into);
+            const sc = 1 + (from.s - 1) * back + (to.s - 1) * into;
+            r.frame.style.transform = `translate3d(${r4(x)}px,${r4(y - fr.top)}px,0) scale(${r4(sc)})`;
+            r.frame.style.opacity = "";
+          } else {
+            const x = lerp(room.pan[0], room.pan[1], life);
+            r.frame.style.transform = `translate3d(${r4(x)}%,0,0) scale(${r4(1.04 + 0.1 * life + 0.25 * through)})`;
+            r.frame.style.opacity = "";
+          }
         }
-        const cap = smooth(seg(p, room.in + 0.035, room.in + 0.07)) * (1 - smooth(seg(p, room.out - 0.035, room.out - 0.005)));
+        // the room's words: computers — while we are in it; phones — while it is seen whole
+        const capIn = geo.tall ? room.in + 0.05 : room.phoneOnly ? 0.3 : room.in + 0.035;
+        const capOut = geo.tall ? room.in + 0.112 : exit - 0.03;
+        const cap = smooth(seg(p, capIn, capIn + 0.025)) * (1 - smooth(seg(p, capOut, capOut + 0.025)));
         setVis(el.caps[i], cap);
         el.caps[i].style.transform = `translate3d(0,${r4((1 - cap) * 18)}px,0)`;
       });
@@ -470,7 +564,7 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
     const wrap = wrapRef.current;
     const t = trackRef.current;
     if (!wrap || !t) return;
-    const top = wrap.getBoundingClientRect().top + window.scrollY + t.offsetHeight * 0.32;
+    const top = wrap.getBoundingClientRect().top + window.scrollY + t.offsetHeight * 0.22;
     window.scrollTo({ top, behavior: "smooth" });
   };
 
@@ -484,7 +578,10 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
 
             {/* Scene 03 — the hall behind the doors */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="ie-hall" src={src("hall.webp")} alt="" decoding="async" loading="lazy" />
+            <picture>
+              <source media="(max-aspect-ratio: 1/1)" srcSet={src("hall-tall.webp")} />
+              <img className="ie-hall" src={src("hall.webp")} alt="" decoding="async" loading="lazy" />
+            </picture>
 
             {/* Scenes 01–02 — the entrance: two doors with the B and S handles */}
             <div className="ie-box">
@@ -525,20 +622,27 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
             <div className="ie-bloom" />
             <GoldDust className="ie-dust" />
 
-            {/* Scenes 04–06 — rooms of the same home */}
+            {/* Scenes 03–06 — the rooms of the same home (each new view dissolves in over the last) */}
             {ROOMS.map((room) => (
-              <div key={room.key} className="ie-room">
-                <picture>
-                  <source media="(max-aspect-ratio: 4/5)" data-srcset={src(`${room.key}-portrait.webp`)} />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt=""
-                    decoding="async"
-                    data-srcset={`${src(`${room.key}-1280.webp`)} 1280w, ${src(`${room.key}.webp`)} 2128w`}
-                    sizes="100vw"
-                    loading="lazy"
-                  />
-                </picture>
+              <div key={room.key} className="ie-room" data-room={room.key}>
+                {/* phones: a warm, blurred backdrop made from the same picture */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="ie-room-bg" alt="" decoding="async" data-src={src(`${room.key}-blur.webp`)} loading="lazy" />
+                <div className="ie-room-frame">
+                  <picture>
+                    <source media="(max-aspect-ratio: 1/1)" data-srcset={src(`${room.key}-m.webp`)} />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt=""
+                      decoding="async"
+                      data-srcset={
+                        room.phoneOnly ? src(`${room.key}-m.webp`) : `${src(`${room.key}-1280.webp`)} 1280w, ${src(`${room.key}.webp`)} 2600w`
+                      }
+                      sizes="100vw"
+                      loading="lazy"
+                    />
+                  </picture>
+                </div>
                 <div className="ie-scrim" />
               </div>
             ))}
