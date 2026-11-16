@@ -20,6 +20,10 @@ const NO_POPUP_PATHS = ["/contact", "/privacy-policy", "/terms"];
 
 /** Is the visitor busy (typing, menu or another overlay open)? Then the timed pop-up waits. */
 function visitorIsBusy() {
+  // The home page's cinematic entrance is still playing, or has only just ended (give the visitor a moment).
+  const root = document.documentElement;
+  if (root.classList.contains("intro-on")) return true;
+  if (Date.now() - Number(root.dataset.introEnded || 0) < 8000) return true;
   const a = document.activeElement;
   if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.tagName === "SELECT")) return true;
   if (document.querySelector("dialog[open]")) return true;

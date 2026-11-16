@@ -16,13 +16,13 @@ export function WhatsAppButton() {
 
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" aria-label="Chat with Build Smart on WhatsApp (opens in a new tab)" className={cls}>
+      <a href={href} target="_blank" rel="noopener noreferrer" aria-label="Chat with Build Smart on WhatsApp (opens in a new tab)" className={cls} data-chrome>
         <WhatsAppIcon className="size-6 sm:size-7" />
       </a>
     );
   }
   return (
-    <button type="button" onClick={() => openConsultation("whatsapp-fallback")} aria-label="Contact Build Smart" title="Contact Build Smart" className={cls}>
+    <button type="button" onClick={() => openConsultation("whatsapp-fallback")} aria-label="Contact Build Smart" title="Contact Build Smart" className={cls} data-chrome>
       <WhatsAppIcon className="size-6 sm:size-7" />
     </button>
   );

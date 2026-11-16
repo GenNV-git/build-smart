@@ -9,6 +9,7 @@ import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { CtaBanner } from "@/components/layout/CtaBanner";
 import { ServiceMarquee } from "@/components/motion/ServiceMarquee";
+import { EntranceIntro } from "@/components/intro/EntranceIntro";
 import { pageMeta, withArea } from "@/lib/seo";
 import { site } from "@/content/site";
 
@@ -17,7 +18,10 @@ export const metadata: Metadata = pageMeta({ title: "Home", description: withAre
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      {/* The scroll-controlled entrance plays over the hero, then hands over to it. */}
+      <EntranceIntro>
+        <Hero />
+      </EntranceIntro>
       <StatsBar />
       <AboutIntro />
       <ServiceMarquee />

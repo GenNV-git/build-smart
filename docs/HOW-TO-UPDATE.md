@@ -252,6 +252,29 @@ Shown when the site is opened or reloaded — not when moving between pages. It 
 
 ---
 
+## The cinematic entrance ("Open the door to better living")
+
+When someone opens the home page, two wooden doors with the **B** and **S** handles fill the screen. As they scroll, the doors open, the camera walks into the hall, then the living room, bedroom and kitchen, and passes through an arch of light into the normal home page. The header, buttons and pop-up wait until it has finished.
+
+**When it plays**
+- On the home page, the first time it is opened in a browser tab. After it has been seen (or skipped) it does not play again in that tab.
+- Not for visitors whose phone/computer asks for reduced motion, not for links to a section (e.g. `/#services`), and not when JavaScript is off — they get the normal home page.
+- A **Skip Intro** button is always visible (the **Esc** key also skips). The quote pop-up never opens during the entrance.
+
+**To see it again while testing:** open `http://localhost:3000/?intro` (or `https://www.buildsmart.org.in/?intro`). `?nointro` opens the home page without it.
+
+| To change… | Where |
+| --- | --- |
+| The pictures (entrance, doors, B/S handles, hall, rooms) | `public/images/intro/` — replace a file with the **same name and the same size in pixels**. The doors and handles are placed exactly on `entrance.webp`, so replace those only together. |
+| The words ("Every beautiful space…", "Designed for the way you live." …) | `src/components/intro/EntranceIntro.tsx` — the `ROOMS` list and the text near the bottom of the file |
+| How long it is (how much scrolling) | `src/app/globals.css`, search for `.ie-track` — `400svh` on phones, `520svh` on larger screens (100svh = one screen height) |
+| When each scene starts | `SCENES` and `ROOMS` in `EntranceIntro.tsx` (0 = start, 1 = home page) |
+| Switch it off completely | `src/app/page.tsx`: replace `<EntranceIntro><Hero /></EntranceIntro>` with `<Hero />` |
+
+In Google Tag Manager the events `intro_complete` and `intro_skip` show how many visitors watch it to the end.
+
+---
+
 ## Animated graphics
 
 All in `src/components/motion/` and switched off automatically for visitors who ask their phone for reduced motion:

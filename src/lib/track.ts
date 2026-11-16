@@ -8,6 +8,8 @@
  *   quote_popup_view    the timed quote pop-up opened
  *   quote_form_open     a "Get a Quote" button opened the form   { form_source }
  *   contact_click       a Call / WhatsApp / Email link was tapped { method, link_location }
+ *   intro_complete      a visitor scrolled all the way through the home-page entrance
+ *   intro_skip          a visitor pressed "Skip Intro" (or Esc)   { intro_progress: 0–100 }
  */
 type Params = Record<string, string | number | boolean | undefined>;
 

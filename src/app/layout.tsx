@@ -105,10 +105,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Enables reveal animations only when JS runs — content is never hidden without it. */}
         {/* "splash-on" holds the first reveal animations until the opening screen lifts (see Splash). */}
+        {/* "intro-on" starts the cinematic entrance on the home page (see src/components/intro/EntranceIntro.tsx):
+            on a new visit, not for reduced motion, not for links to a section; ?intro forces it, ?nointro turns it off. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(d){d.classList.add('js','splash-on');setTimeout(function(){d.classList.remove('splash-on')},950)})(document.documentElement)",
+              "(function(d){d.classList.add('js','splash-on');setTimeout(function(){d.classList.remove('splash-on')},950);" +
+              "try{var l=location,s=l.search;if(l.pathname==='/'&&!/[?&]nointro\\b/.test(s)&&(/[?&]intro\\b/.test(s)||(!l.hash&&!/[?&]show-quote\\b/.test(s)&&" +
+              "!matchMedia('(prefers-reduced-motion: reduce)').matches&&!sessionStorage.getItem('bs-intro'))))d.classList.add('intro-on','intro-play')}catch(e){}" +
+              "})(document.documentElement)",
           }}
         />
         <JsonLd data={jsonLd} />

@@ -74,6 +74,7 @@ export function Header() {
   return (
     <>
       <header
+        data-chrome
         className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,padding,border-color] duration-500 ${
           solid ? "border-gold/15 bg-espresso/95 py-2.5 lg:bg-espresso/85 lg:backdrop-blur-xl" : "border-transparent bg-transparent py-3.5 sm:py-5"
         }`}
