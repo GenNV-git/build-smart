@@ -79,7 +79,8 @@ const r4 = (n: number) => Math.round(n * 10000) / 10000;
 
 type Geo = {
   vw: number;
-  vh: number;
+  vh: number; // height the scene is composed for
+  sh: number; // height the scene is painted to (at least the whole screen)
   u: number; // px per unit at the start
   cx: number; // screen position of the eye-level point between the doors
   cy: number;
@@ -89,9 +90,27 @@ type Geo = {
   arch: { wall: string; trim: string; floor: number; cy: number; ox: number; oy: number; ow: number; oh: number };
 };
 
+/** Height of 100lvh in pixels (the screen with the browser's bars tucked away). */
+function largeViewportHeight(): number {
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:absolute;top:0;left:0;width:1px;height:100vh;height:100lvh;visibility:hidden;pointer-events:none";
+  document.body.appendChild(probe);
+  const h = probe.offsetHeight;
+  probe.remove();
+  return h;
+}
+
 function measure(stage: HTMLElement): Geo {
   const vw = stage.clientWidth || window.innerWidth;
-  const vh = stage.clientHeight || window.innerHeight;
+  const lvh = largeViewportHeight() || window.innerHeight;
+  // Phones and tablets: compose the scene for the part of the screen that is visible right now (with the browser's
+  // bars showing), but paint it tall enough to cover the whole screen when the bars slide away — in Safari, Chrome and
+  // the in-app browsers of Instagram, WhatsApp etc. — so nothing ever looks cut off at the bottom.
+  const touch = window.matchMedia("(pointer: coarse)").matches;
+  const portraitNow = window.innerHeight >= window.innerWidth;
+  const screenTall = portraitNow ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+  const vh = touch ? Math.min(window.innerHeight, lvh) || lvh : lvh;
+  const sh = touch ? Math.max(vh, lvh, window.innerHeight, screenTall || 0) : lvh;
   const u = Math.max(vh / FH, vw / 780);
   const top = Math.min(0, Math.max(vh - FH * u, vh / 2 - FOCUS_Y * u));
   const cx = vw / 2;
@@ -105,13 +124,13 @@ function measure(stage: HTMLElement): Geo {
       1.25,
       vw / 2 / (innerEdge * u), // the open doors have slid off both sides
       cy / (FOCUS_Y * u), // the top of the doorway is above the screen
-      (vh - cy) / ((345 - FOCUS_Y) * u), // the threshold is below the screen
+      (sh - cy) / ((345 - FOCUS_Y) * u), // the threshold is below the screen
     ) * 1.06;
 
   // The hall must always fill whatever part of the screen the doorway shows.
   const hallCover = (z: number) => {
     const s = u * z;
-    return Math.max(Math.min(DOOR_W * s, vw / 2) / HALL_HALF_W, Math.min(FOCUS_Y * s, cy) / HALL_ABOVE, Math.min((345 - FOCUS_Y) * s, vh - cy) / HALL_BELOW) / u;
+    return Math.max(Math.min(DOOR_W * s, vw / 2) / HALL_HALF_W, Math.min(FOCUS_Y * s, cy) / HALL_ABOVE, Math.min((345 - FOCUS_Y) * s, sh - cy) / HALL_BELOW) / u;
   };
 
   // The architectural frame at the end: a dark panelled wall with an arched opening of light.
@@ -125,12 +144,12 @@ function measure(stage: HTMLElement): Geo {
   const ty = floor - oh;
   const t = Math.max(8, ow * 0.045);
   const f = (n: number) => n.toFixed(1);
-  const wall = `M0 0H${f(vw)}V${f(vh)}H0Z M${f(x0)} ${f(floor)}V${f(ty + r)}A${f(r)} ${f(r)} 0 0 1 ${f(x1)} ${f(ty + r)}V${f(floor)}Z`;
+  const wall = `M0 0H${f(vw)}V${f(sh)}H0Z M${f(x0)} ${f(floor)}V${f(ty + r)}A${f(r)} ${f(r)} 0 0 1 ${f(x1)} ${f(ty + r)}V${f(floor)}Z`;
   const trim = `M${f(x0 - t)} ${f(floor)}V${f(ty + r)}A${f(r + t)} ${f(r + t)} 0 0 1 ${f(x1 + t)} ${f(ty + r)}V${f(floor)}`;
 
   const hallBase = Math.min(1, hallCover(1) * 1.15);
 
-  return { vw, vh, u, cx, cy, zPass, hallCover, hallBase, arch: { wall, trim, floor, cy: ty + oh * 0.55, ox: x0, oy: ty, ow, oh } };
+  return { vw, vh, sh, u, cx, cy, zPass, hallCover, hallBase, arch: { wall, trim, floor, cy: ty + oh * 0.55, ox: x0, oy: ty, ow, oh } };
 }
 
 /** Module-level so React's development double-mount doesn't end the intro. */
@@ -183,6 +202,7 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       archTrim: q<SVGElement>(".ie-arch-trim"),
       archGlow: q(".ie-arch-glow"),
       archBloom: q(".ie-arch-bloom"),
+      archRefl: q(".ie-arch-refl"),
       vignette: q(".ie-vignette"),
       archSvg: q<SVGElement>(".ie-arch svg"),
       bar: q(".ie-progress > span"),
@@ -204,16 +224,18 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       geo = measure(stage);
       stage.style.setProperty("--vw", `${geo.vw}px`);
       stage.style.setProperty("--vh", `${geo.vh}px`);
+      stage.style.setProperty("--sh", `${geo.sh}px`);
       stage.style.setProperty("--u", `${geo.u}px`);
       const a = geo.arch;
-      el.archSvg.setAttribute("viewBox", `0 0 ${geo.vw} ${geo.vh}`);
+      el.archSvg.setAttribute("viewBox", `0 0 ${geo.vw} ${geo.sh}`);
       el.archWall.setAttribute("d", a.wall);
       el.archSvg.querySelector(".ie-arch-wall-flutes")?.setAttribute("d", a.wall);
       el.archTrim.setAttribute("d", a.trim);
       el.archSvg.querySelector(".ie-arch-floor")?.setAttribute("y", `${a.floor}`);
-      el.archSvg.querySelector(".ie-arch-floor")?.setAttribute("height", `${geo.vh - a.floor}`);
+      el.archSvg.querySelector(".ie-arch-floor")?.setAttribute("height", `${geo.sh - a.floor}`);
+      Object.assign(el.archRefl.style, { left: `${a.ox}px`, top: `${a.floor}px`, width: `${a.ow}px`, height: `${Math.min(geo.sh - a.floor, a.oh * 0.7)}px` });
       Object.assign(el.archGlow.style, { left: `${a.ox}px`, top: `${a.oy}px`, width: `${a.ow}px`, height: `${a.floor - a.oy}px` });
-      Object.assign(el.archBloom.style, { left: `${a.ox - a.ow}px`, top: `${a.oy - a.ow * 0.5}px`, width: `${a.ow * 3}px`, height: `${geo.vh - a.oy + a.ow * 0.5}px` });
+      Object.assign(el.archBloom.style, { left: `${a.ox - a.ow}px`, top: `${a.oy - a.ow * 0.5}px`, width: `${a.ow * 3}px`, height: `${geo.sh - a.oy + a.ow * 0.5}px` });
       el.arch.style.transformOrigin = `50% ${a.cy}px`;
       const r = wrap.getBoundingClientRect();
       start = r.top + window.scrollY;
@@ -303,6 +325,7 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       const glow = 1 - smooth(seg(p, SCENES.glowOut[0], SCENES.glowOut[1]));
       el.archGlow.style.opacity = `${r4(0.94 * glow)}`;
       el.archBloom.style.opacity = `${r4(glow)}`;
+      el.archRefl.style.opacity = `${r4(glow)}`;
       setVis(el.vignette, 1 - smooth(seg(p, SCENES.wallOut[0], SCENES.wallOut[1])));
       setVis(el.base, 1 - seg(p, SCENES.heroUnder[0], SCENES.heroUnder[1]));
 
@@ -390,7 +413,7 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
     let lastH = 0;
     const onResize = () => {
       const w = stage.clientWidth;
-      const h = stage.clientHeight;
+      const h = window.innerHeight;
       // Phones resize the screen as the address bar slides away; only re-measure for real changes.
       if (w === lastW && Math.abs(h - lastH) < 120) return;
       lastW = w;
@@ -409,7 +432,7 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
 
     applyGeo();
     lastW = stage.clientWidth;
-    lastH = stage.clientHeight;
+    lastH = window.innerHeight;
     cur = target = read();
     render(cur);
     root.classList.add("intro-ready");
@@ -540,6 +563,7 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
                 <rect className="ie-arch-floor" x="0" width="100%" fill="url(#ie-floor)" />
                 <path className="ie-arch-trim" fill="none" stroke="#d6b16d" strokeWidth="1.6" d="" />
               </svg>
+              <div className="ie-arch-refl" />
               <div className="ie-arch-bloom" />
             </div>
 

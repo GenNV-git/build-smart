@@ -405,14 +405,16 @@ html.js.intro-on .ie-track { display: block; height: 400svh; background: var(--c
 @media (min-width: 768px) { html.js.intro-on .ie-track { height: 520svh; } }
 html.js.intro-on.intro-leaving .ie-track { display: none; }
 html.js.intro-on .ie-stage {
-  display: block; position: absolute; top: 0; left: 0; z-index: 30; width: 100%; height: 100vh; height: 100lvh; overflow: hidden;
+  display: block; position: absolute; top: 0; left: 0; z-index: 30; width: 100%; height: var(--sh); overflow: hidden;
   container-type: size; color: var(--color-cream); background: #1b110b;
   /* Units of the entrance picture (815 × 386); the script replaces these with exact pixel values. */
+  --sh: 100vh; /* painted height: the script makes it cover the whole phone screen, bars or not */
   --vw: 100cqw; --vh: 100cqh;
   --u: max(calc(var(--vh) / 386), calc(var(--vw) / 780));
   --bt: clamp(calc(var(--vh) - var(--u) * 386), calc(var(--vh) / 2 - var(--u) * 185), 0px);
   --L: min(calc(var(--u) * 236), calc(var(--vw) * 0.8)); /* width of the B|S logo across the doors */
 }
+@supports (height: 100lvh) { html.js.intro-on .ie-stage { --sh: 100lvh; } }
 html.js.intro-on.intro-ready .ie-stage { background: transparent; }
 html.js.intro-on.intro-leaving .ie-stage { opacity: 0; transition: opacity 0.7s var(--ease-lux); pointer-events: none; }
 /* If the page's scripts never start, step aside after a few seconds rather than hide the homepage. */
@@ -433,15 +435,16 @@ html.js.intro-on:not(.intro-ready) .ie-track { animation: ie-failsafe-track 0.01
 }
 
 /* The entrance: picture with a doorway-shaped hole, two door leaves in 3D, the B and S handles */
+/* The picture is 815 × 536 units: the scene is composed on its top 386 units; the polished floor below fills tall phone screens. */
 .ie-box {
-  position: absolute; left: calc(var(--vw) / 2 - var(--u) * 425); top: var(--bt); width: calc(var(--u) * 815); height: calc(var(--u) * 386);
-  transform-origin: 52.147% 47.927%; perspective: calc(var(--u) * 460); perspective-origin: 52.147% 47.927%;
+  position: absolute; left: calc(var(--vw) / 2 - var(--u) * 425); top: var(--bt); width: calc(var(--u) * 815); height: calc(var(--u) * 536);
+  transform-origin: calc(var(--u) * 425) calc(var(--u) * 185); perspective: calc(var(--u) * 460); perspective-origin: calc(var(--u) * 425) calc(var(--u) * 185);
 }
 .ie-entrance { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* Each leaf reaches one unit under the frame and threshold, so no light leaks round a closed door. */
-.ie-leaf { position: absolute; top: 0; width: 26.503%; height: 89.637%; transform-style: preserve-3d; }
-.ie-leaf-l { left: 25.644%; transform-origin: 0 50%; }
-.ie-leaf-r { left: 52.147%; transform-origin: 100% 50%; }
+.ie-leaf { position: absolute; top: 0; width: calc(var(--u) * 216); height: calc(var(--u) * 346); transform-style: preserve-3d; }
+.ie-leaf-l { left: calc(var(--u) * 209); transform-origin: 0 50%; }
+.ie-leaf-r { left: calc(var(--u) * 425); transform-origin: 100% 50%; }
 .ie-face, .ie-wood, .ie-shade { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ie-shade { opacity: 0; }
 .ie-leaf-l .ie-shade { background: linear-gradient(90deg, rgb(14 8 4 / 0.3), rgb(14 8 4 / 0.88)); }
@@ -479,10 +482,14 @@ html.js.intro-on:not(.intro-ready) .ie-track { animation: ie-failsafe-track 0.01
 /* Light: through the gap, on the floor, and a soft bloom over everything */
 .ie-flare, .ie-spill, .ie-bloom { position: absolute; opacity: 0; visibility: hidden; pointer-events: none; }
 .ie-flare {
-  left: 25.767%; width: 52.76%; top: 0; height: 89.378%;
+  left: calc(var(--u) * 210); width: calc(var(--u) * 430); top: 0; height: calc(var(--u) * 345);
   background: radial-gradient(55% 62% at 50% 52%, rgb(255 247 230) 0%, rgb(255 224 172 / 0.88) 34%, rgb(255 198 124 / 0.3) 74%, rgb(255 190 110 / 0) 100%);
 }
-.ie-spill { left: 10%; width: 80%; top: 86%; height: 14%; mix-blend-mode: screen; background: radial-gradient(48% 80% at 50% 0%, rgb(255 214 156 / 0.6), rgb(255 200 130 / 0) 100%); }
+/* light from the open doorway reflected in the polished floor */
+.ie-spill {
+  left: calc(var(--u) * 150); width: calc(var(--u) * 550); top: calc(var(--u) * 343); height: calc(var(--u) * 193); mix-blend-mode: screen;
+  background: radial-gradient(40% 100% at 50% 0%, rgb(255 222 168 / 0.7), rgb(255 205 140 / 0.22) 55%, rgb(255 200 130 / 0) 100%);
+}
 .ie-bloom { inset: 0; mix-blend-mode: screen; background: radial-gradient(36% 52% at 50% 48%, rgb(255 226 178 / 0.4), rgb(255 210 150 / 0) 72%); }
 .ie-dust { opacity: 0.8; }
 
@@ -494,18 +501,23 @@ html.js.intro-on:not(.intro-ready) .ie-track { animation: ie-failsafe-track 0.01
   background: linear-gradient(90deg, rgb(20 12 7 / 0.8) 0%, rgb(20 12 7 / 0.45) 30%, rgb(20 12 7 / 0) 58%), linear-gradient(0deg, rgb(20 12 7 / 0.55), rgb(20 12 7 / 0) 38%);
 }
 @media (max-aspect-ratio: 4/5) {
-  .ie-scrim { background: linear-gradient(0deg, rgb(20 12 7 / 0.88) 0%, rgb(20 12 7 / 0.45) 30%, rgb(20 12 7 / 0) 56%), linear-gradient(180deg, rgb(20 12 7 / 0.5), rgb(20 12 7 / 0) 22%); }
+  .ie-scrim { background: linear-gradient(0deg, rgb(20 12 7 / 0.66) 0%, rgb(20 12 7 / 0.36) 26%, rgb(20 12 7 / 0) 46%), linear-gradient(180deg, rgb(20 12 7 / 0.38), rgb(20 12 7 / 0) 18%); }
 }
 
 /* The arched frame of light into the homepage */
 .ie-arch { position: absolute; inset: 0; opacity: 0; visibility: hidden; will-change: transform; }
 .ie-arch svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ie-arch-glow { position: absolute; border-radius: 999px 999px 0 0; background: radial-gradient(75% 62% at 50% 64%, #fffaf0 0%, #ffe8bf 38%, #f5cd8f 72%, #dca865 100%); }
+.ie-arch-refl {
+  position: absolute; pointer-events: none; mix-blend-mode: screen; filter: blur(6px);
+  background: linear-gradient(180deg, rgb(255 226 176 / 0.55), rgb(255 210 150 / 0.18) 45%, rgb(255 200 130 / 0) 100%);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
 .ie-arch-bloom { position: absolute; pointer-events: none; mix-blend-mode: screen; background: radial-gradient(closest-side, rgb(255 220 160 / 0.42), rgb(255 205 140 / 0.12) 55%, rgb(255 200 130 / 0) 100%); }
 
 .ie-vignette {
   position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgb(15 9 5 / 0.55) 0%, rgb(15 9 5 / 0) 24%, rgb(15 9 5 / 0) 70%, rgb(15 9 5 / 0.55) 100%);
+  background: linear-gradient(180deg, rgb(15 9 5 / 0.5) 0%, rgb(15 9 5 / 0) 24%, rgb(15 9 5 / 0) 72%, rgb(15 9 5 / 0.38) 100%);
 }
 
 /* Words and controls (sized to the visible screen, under any phone address bar) */
@@ -565,7 +577,8 @@ html.js.intro-on:not(.intro-ready) .ie-track { animation: ie-failsafe-track 0.01
   .ie-cap-title { font-size: clamp(1.8rem, 8.6vw, 2.7rem); }
 }
 
-.ie-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgb(214 177 109 / 0.14); }
+/* journey progress: a hairline along the top edge (the bottom edge can sit under a phone's browser bar) */
+.ie-progress { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: rgb(214 177 109 / 0.12); }
 .ie-progress > span { display: block; height: 100%; transform: scaleX(0); transform-origin: left; background: linear-gradient(90deg, #94702f, #ecd5a4); }
 
 @keyframes ie-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
