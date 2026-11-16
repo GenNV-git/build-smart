@@ -430,8 +430,8 @@ html.js.intro-on:not(.intro-ready) .ie-track { animation: ie-failsafe-track 0.01
 
 /* The hall, seen through the doorway */
 .ie-hall {
-  position: absolute; left: calc(var(--vw) / 2 - var(--u) * 247.25); top: calc(var(--bt) - var(--u) * 129.5);
-  width: calc(var(--u) * 494.5); height: calc(var(--u) * 604); object-fit: cover; transform-origin: 50% 52.07%; will-change: transform;
+  position: absolute; left: calc(var(--vw) / 2 - var(--u) * 245); top: calc(var(--bt) - var(--u) * 25);
+  width: calc(var(--u) * 490); height: calc(var(--u) * 426); object-fit: cover; transform-origin: 50% 49.296%; will-change: transform;
 }
 
 /* The entrance: picture with a doorway-shaped hole, two door leaves in 3D, the B and S handles */

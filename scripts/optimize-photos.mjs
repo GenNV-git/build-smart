@@ -13,7 +13,8 @@ import path from "node:path";
 const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, "public", "images");
 const BACKUP = path.join(ROOT, "photo-originals");
-const SKIP = [/^brand[\\/]/, /^og-image\./];
+// brand/: logos. intro/: the home-page entrance pictures, already sized and compressed for it.
+const SKIP = [/^brand[\\/]/, /^intro[\\/]/, /^og-image\./];
 const MAX_BYTES = 600 * 1024;
 const MAX_EDGE = 2200;
 const TARGET_EDGE = 2000;

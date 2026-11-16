@@ -265,13 +265,17 @@ When someone opens the home page, two wooden doors with the **B** and **S** hand
 
 | To change… | Where |
 | --- | --- |
-| The pictures (entrance, doors, B/S handles, hall, rooms) | `public/images/intro/` — replace a file with the **same name and the same size in pixels**. The doors and handles are placed exactly on `entrance.webp`, so replace those only together. |
+| The pictures (entrance, doors, B/S handles, hall, rooms) | `public/images/intro/` — replace a file with the **same name and the same shape** (`living.webp` landscape, `living-portrait.webp` tall for phones, `hall.webp` 2600 × 2261). The doors and handles are placed exactly on `entrance.webp`, so replace those only together. Pictures in this folder are not shrunk automatically, so keep each under about 500 KB. |
 | The words ("Every beautiful space…", "Designed for the way you live." …) | `src/components/intro/EntranceIntro.tsx` — the `ROOMS` list and the text near the bottom of the file |
 | How long it is (how much scrolling) | `src/app/globals.css`, search for `.ie-track` — `400svh` on phones, `520svh` on larger screens (100svh = one screen height) |
 | When each scene starts | `SCENES` and `ROOMS` in `EntranceIntro.tsx` (0 = start, 1 = home page) |
 | Switch it off completely | `src/app/page.tsx`: replace `<EntranceIntro><Hero /></EntranceIntro>` with `<Hero />` |
 
 In Google Tag Manager the events `intro_complete` and `intro_skip` show how many visitors watch it to the end.
+
+**Where the room pictures come from.** The hall, living room, bedroom and kitchen are free photos from Unsplash (free for commercial websites under the [Unsplash License](https://unsplash.com/license); no credit is required), colour-matched to one warm look:
+hall, living room and kitchen by [Aalo Lens](https://unsplash.com/@aalolens) — [hall](https://unsplash.com/photos/Ez7fz5mavj0), [living room](https://unsplash.com/photos/-QCjahEjubY), [kitchen](https://unsplash.com/photos/UlIj_qKpgCw); bedroom by [mahmoud azmy](https://unsplash.com/photos/IUTewwzaFeM).
+They are not Build Smart projects — when you have renders or photos of your own homes, put them in their place.
 
 ---
 

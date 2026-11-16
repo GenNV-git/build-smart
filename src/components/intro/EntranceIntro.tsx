@@ -31,9 +31,9 @@ const DOOR_W = 215;
 const FOCUS_Y = 185; // eye level: where the camera walks towards
 const CAMERA = 460; // camera distance from the doors (gives the door swing its perspective)
 const OPEN_DEG = 84; // how far each door swings open
-const HALL_HALF_W = 247.25; // the hall picture (494.5 × 604 units) sits behind the doorway, a little larger than it
-const HALL_ABOVE = 314.5; // from the hall's top edge to eye level
-const HALL_BELOW = 289.5; // from eye level to the hall's bottom edge
+const HALL_HALF_W = 245; // the hall picture (490 × 426 units) sits behind the doorway, a little larger than it
+const HALL_ABOVE = 210; // from the hall's top edge to eye level (a little above the picture's horizon: we look up at the chandelier)
+const HALL_BELOW = 216; // from eye level to the hall's bottom edge
 
 /** Scroll positions (0 = top of the intro, 1 = homepage) for each part of the journey. */
 const SCENES = {
@@ -42,7 +42,7 @@ const SCENES = {
   approach: [0.05, 0.3],
   doorCaption: [0.1, 0.145, 0.235, 0.285],
   dolly: [0.27, 0.45],
-  hallPush: [0.4, 0.56],
+  hallPush: [0.4, 0.57],
   archIn: [0.885, 0.915],
   heroUnder: [0.915, 0.93],
   archPass: [0.92, 1],
@@ -284,8 +284,11 @@ export function EntranceIntro({ children }: { children: ReactNode }) {
       setVis(el.bloom, crack * 0.85 * (1 - smooth(seg(p, 0.24, 0.4))));
 
       // Scene 03: the hall, further away than the doors (it grows more slowly — depth), then the camera walks in.
-      const hallS = Math.max(geo.hallCover(z), geo.hallBase * Math.pow(z, 0.55)) * (1 + 0.24 * inOut(seg(p, SCENES.hallPush[0], SCENES.hallPush[1])));
-      el.hall.style.transform = `scale(${r4(hallS)})`;
+      const hallS = Math.max(geo.hallCover(z), geo.hallBase * Math.pow(z, 0.45)) * (1 + 0.2 * inOut(seg(p, SCENES.hallPush[0], SCENES.hallPush[1])));
+      // ...and, walking in, the eyes drop from the chandelier towards the seating (never uncovering the bottom edge)
+      const room = geo.cy + HALL_BELOW * geo.u * hallS - geo.sh;
+      const tilt = Math.min(geo.vh * 0.09 * smooth(seg(p, SCENES.hallPush[0], SCENES.hallPush[1])), Math.max(0, room));
+      el.hall.style.transform = `translate3d(0,${r4(-tilt)}px,0) scale(${r4(hallS)})`;
       setVis(el.hall, ang > 0.05 && p < ROOMS[0].in + ROOM_FADE + 0.01 ? 1 : 0); // only needed once the doors part
       setVis(el.dust, 1 - smooth(seg(p, 0.2, 0.36)));
 
