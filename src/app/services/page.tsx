@@ -66,8 +66,8 @@ export default function ServicesPage() {
             const Icon = serviceIcons[s.icon];
             const flip = i % 2 === 1;
             const size = publicImageSize(s.image.src);
-            // Show each photo in its own shape (between square and wide), so nothing important is cropped.
-            const ratio = size ? Math.min(1.6, Math.max(1, size.width / size.height)) : 4 / 3;
+            // Show each photo in its own shape (between square and 16:9), so nothing important is cropped.
+            const ratio = size ? Math.min(16 / 9, Math.max(1, size.width / size.height)) : 4 / 3;
             return (
               <section key={s.slug} id={s.slug} aria-labelledby={`${s.slug}-title`} className="grid scroll-mt-28 items-center gap-10 lg:grid-cols-2 lg:gap-20">
                 <div style={{ aspectRatio: ratio }} className={`img-zoom relative overflow-hidden rounded-[1.3rem] sm:rounded-[1.6rem] shadow-[var(--shadow-soft)] ${flip ? "lg:order-2" : ""}`} data-reveal>

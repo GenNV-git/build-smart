@@ -57,7 +57,14 @@ export const services: Service[] = [
       "Transparent progress reporting",
       "Snag list, final finishing and handover",
     ],
-    image: { src: "/images/services/turnkey-projects.jpg", alt: "Handing over the keys of a finished home to its owners", position: "40% 50%", temporary: false },
+    // The picture has words in it, so the Services page shows it whole (16:9) and the home page's small card uses a
+    // crop without the sign (turnkey-projects-card.jpg).
+    image: {
+      src: "/images/services/turnkey-projects.jpg",
+      cardSrc: "/images/services/turnkey-projects-card.jpg",
+      alt: "Turnkey project management, from concept to keys: consultation, design, approvals, materials, construction, interiors and handover around a finished modern home",
+      temporary: false,
+    },
     icon: "key",
   },
   {

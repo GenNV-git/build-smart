@@ -37,6 +37,8 @@ Every picture on the site already has its own file with a clear name. Put your p
 
 After replacing a photo, open the matching file in `src/content/` and change `temporary: true` to `temporary: false` for it. (This only removes the yellow preview tag.)
 
+The **Turnkey Projects** picture has words in it, so it has two files: `services/turnkey-projects.jpg` (16:9, shown whole on the Services page) and `services/turnkey-projects-card.jpg` (4:3, the part without the sign, for the small card on the home page). Replace both together. Any other service picture can have a card version too: add `cardSrc` next to its `src` in `src/content/services.ts`.
+
 **Photo tips**
 - Use **JPG** where you can. Big photos straight from a phone or designer (2–5 MB) are fine: **they are shrunk automatically** every time you run `npm run dev` or `npm run build` (to fit 2000 px, high quality — no visible difference). The untouched originals are kept in the `photo-originals` folder. You can also run it any time with `npm run photos`.
 - File names: lowercase, no spaces (`living-room-2.jpg`, not `Living Room (2).JPG`).

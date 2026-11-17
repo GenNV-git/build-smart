@@ -32,7 +32,7 @@ export function ServicesSection() {
                   className="card-lux card-lift group flex h-full items-stretch overflow-hidden sm:flex-col"
                 >
                   <div className="img-zoom relative w-[7.5rem] shrink-0 overflow-hidden min-[400px]:w-[8.5rem] sm:aspect-[4/3] sm:w-full">
-                    <Image src={s.image.src} alt={s.image.alt} fill sizes="(min-width: 1024px) 24vw, (min-width: 640px) 45vw, 140px" className="object-cover" style={{ objectPosition: s.image.position || "50% 50%" }} />
+                    <Image src={s.image.cardSrc || s.image.src} alt={s.image.alt} fill sizes="(min-width: 1024px) 24vw, (min-width: 640px) 45vw, 140px" className="object-cover" style={{ objectPosition: s.image.position || "50% 50%" }} />
                     {s.image.temporary && <TempImageTag />}
                   </div>
                   <div className="relative flex flex-1 flex-col justify-center gap-1 px-4 py-4 sm:justify-start sm:px-6 sm:pb-6 sm:pt-9">

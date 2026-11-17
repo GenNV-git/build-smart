@@ -14,6 +14,11 @@ export type ImageAsset = {
    * Default "50% 50%" (centre). Use e.g. "50% 25%" to keep faces near the top in view.
    */
   position?: string;
+  /**
+   * Optional second crop of the same picture for small cards (e.g. the home page's service cards), when the main
+   * picture has words in it that a small card would cut off.
+   */
+  cardSrc?: string;
   /** Pixel size — filled in automatically for journey and service photos. */
   width?: number;
   height?: number;
